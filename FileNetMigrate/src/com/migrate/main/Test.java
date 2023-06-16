@@ -54,7 +54,7 @@ public class Test {
         		Document doc = (Document)obj;
         		String sa = doc.get_StorageArea().get_DisplayName();
         		if(!doc.get_Annotations().isEmpty())
-        			System.out.println(doc.get_Id().toString() + "," + sa);
+        			System.out.println(doc.get_Id().toString() + ";" + sa);
 
       		
         	}

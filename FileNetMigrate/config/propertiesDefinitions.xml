@@ -1,0 +1,371 @@
+<properties>
+	<property>
+		<symName>IsDeleted</symName>
+		<description>Is Deleted</description>
+		<dataType>Boolean</dataType>
+		<dataLength></dataLength>
+	</property>
+	<property>
+		<symName>DeleteBy</symName>
+		<description>Delete By</description>
+		<dataType>String</dataType>
+		<dataLength></dataLength>
+	</property>
+	<property>
+		<symName>DeleteDate</symName>
+		<description>Delete Date</description>
+		<dataType>DateTime</dataType>
+		<dataLength></dataLength>
+	</property>
+	<property>
+		<symName>ReceivedDate</symName>
+		<description>Received Date</description>
+		<dataType>DateTime</dataType>
+		<dataLength></dataLength>
+	</property>
+	<property>
+		<symName>ScannedDate</symName>
+		<description>Scanned Date</description>
+		<dataType>DateTime</dataType>
+		<dataLength></dataLength>
+	</property>
+		<property>
+		<symName>AgentCode</symName>
+		<description>Agent Code</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>ApprovalStatus</symName>
+		<description>Approval Status</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>	
+	<property>
+		<symName>BoxNumber</symName>
+		<description>Box No</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>		
+	<property>
+		<symName>BusinessUnit</symName>
+		<description>Business Unit</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>	
+	<property>
+		<symName>CaseNumber</symName>
+		<description>Case Number</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>	
+	<property>
+		<symName>Choice</symName>
+		<description>Choice</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>	
+	<property>
+		<symName>CloseDate</symName>
+		<description>Close Date</description>
+		<dataType>String</dataType>
+		<dataLength>20</dataLength>
+	</property>	
+	<property>
+		<symName>Comment</symName>
+		<description>Comment</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>	
+	<property>
+		<symName>DocumentFrom</symName>
+		<description>Document From</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>		
+	<property>
+		<symName>FormID</symName>
+		<description>Form ID</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>		
+	<property>
+		<symName>MedicalCaseStatus</symName>
+		<description>Medical Case Status</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>		
+	<property>
+		<symName>PolicyNumbers</symName>
+		<description>Policy Numbers</description>
+		<dataType>StringList</dataType>
+		<dataLength>64</dataLength>
+	</property>		
+	<property>
+		<symName>Priority</symName>
+		<description>Priority</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>ProcessedKIVPolicyNo</symName>
+		<description>Processed KIV Policy No</description>
+		<dataType>StringList</dataType>
+		<dataLength>64</dataLength>
+	</property>	
+	<property>
+		<symName>ReadStatus</symName>
+		<description>Read Status</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>			
+	<property>
+		<symName>Remark</symName>
+		<description>Remark</description>
+		<dataType>String</dataType>
+		<dataLength>256</dataLength>
+	</property>
+	<property>
+		<symName>RetentionYear</symName>
+		<description>RetentionYear</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>ScanBatch</symName>
+		<description>Scan Batch</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>ServiceType</symName>
+		<description>Service Type</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>TeleformID</symName>
+		<description>Service Type</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>MarkVoidPolicyNo</symName>
+		<description>Void Policy</description>
+		<dataType>StringList</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	
+	<property>
+		<symName>AccountingPeriod</symName>
+		<description>Accounting Period</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>ChequeNumber</symName>
+		<description>Cheque Number</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>	
+	<property>
+		<symName>PayeeName</symName>
+		<description>Payee Name</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>	
+	<property>
+		<symName>PhysicalFileName</symName>
+		<description>Physical File Name</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>	
+	<property>
+		<symName>DocumentType_Account</symName>
+		<description>Document Type(Account)</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>	
+	<property>
+		<symName>ScanDate</symName>
+		<description>Scan Date</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>AgentState</symName>
+		<description>Agent State</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>	
+	<property>
+		<symName>BrokerCompanyName</symName>
+		<description>Broker Company Name</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>	
+	<property>
+		<symName>HKID</symName>
+		<description>HKID</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>	
+	<property>
+		<symName>AgentID</symName>
+		<description>Agent</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>AgentName</symName>
+		<description>Agent Name</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>DocumentType_Agent</symName>
+		<description>Document Type(Agent)</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>	
+	<property>
+		<symName>Agency</symName>
+		<description>Agency</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>ReportMonthYear</symName>
+		<description>Report Month Year</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>DocumentType_AgentReport</symName>
+		<description>Document Type(Agent Report)</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+
+	<property>
+		<symName>MovementDate</symName>
+		<description>Movement Date</description>
+		<dataType>DateTime</dataType>
+		<dataLength></dataLength>
+	</property>
+	<property>
+		<symName>EBName</symName>
+		<description>EB Name</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>DocumentType_EB</symName>
+		<description>Document Type(EB)</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>DocumentType_POS</symName>
+		<description>Document Type(POS)</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>ChequeAmount</symName>
+		<description>Cheque Amount</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>MPFRefNo</symName>
+		<description>MPF Ref No</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>BRIDNo</symName>
+		<description>BR ID No</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>ClientName</symName>
+		<description>Client Name</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>SchemeNo</symName>
+		<description>Scheme No</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>DocumentType_MPF</symName>
+		<description>Document Type(MPF)</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+
+	<property>
+		<symName>CheckDigit</symName>
+		<description>Check Digit</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>DOB</symName>
+		<description>DOB</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>DocID</symName>
+		<description>Doc ID</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>DocReceiveDate</symName>
+		<description>Doc Receive Date</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>InsuredDOB</symName>
+		<description>Insured DOB</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>InsuredName</symName>
+		<description>Insured Name</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>Status</symName>
+		<description>Status</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>ValidateChkDigit</symName>
+		<description>Validate ChkDigit</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>InsuredIDN</symName>
+		<description>Insured IDN</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>
+	<property>
+		<symName>PolicyName</symName>
+		<description>Policy Name</description>
+		<dataType>String</dataType>
+		<dataLength>64</dataLength>
+	</property>	
+</properties>

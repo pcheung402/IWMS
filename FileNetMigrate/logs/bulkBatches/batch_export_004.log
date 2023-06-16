@@ -1,0 +1,6 @@
+2023-06-15 16:34:08,468  INFO [main] - Connected to P8 Domain mmatstp8domain
+2023-06-15 16:34:08,546  INFO [main] - waiting batch_export_004,Tue Nov 01 00:15:00 CST 2022
+2023-06-15 16:34:08,869  INFO [main] - start,batch_export_004
+2023-06-15 16:37:50,117 ERROR [main] - No Content File, {9604E5CC-05E5-4312-B37B-029999B6A769}, NB_POS
+2023-06-15 16:41:58,284 ERROR [main] - No Content File, {5EF5474B-91E2-4110-94FA-05A4588FCB69}, NB_NBU
+2023-06-15 16:47:10,562  INFO [main] - finished,batch_export_004

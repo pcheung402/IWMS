@@ -1,0 +1,23 @@
+<docClasses>
+	<docClass>
+		<parentClass>IWMSDocument</parentClass>
+		<symName>POS</symName>
+		<property>CheckDigit</property>
+		<property>DOB</property>
+		<property>DocID</property>
+		<property>DocReceiveDate</property>
+		<property>InsuredDOB</property>
+		<property>InsuredName</property>
+		<property>Status</property>
+		<property>ValidateChkDigit</property>
+		<property>InsuredIDN</property>
+		<property>PolicyName</property>
+		<property>PolicyNumbers</property>
+		<property>DocumentFrom</property>
+		<property>PhysicalFileName</property>
+		<property>BoxNumber</property>
+		<property>ScannedDate</property>
+		<property>DocumentType_POS</property>
+		<property>AgentCode</property>
+	</docClass>	
+</docClasses>

@@ -1,0 +1,41 @@
+2022-12-22 11:39:12,164  INFO [main] - Connected to P8 Domain ICM532
+2022-12-22 11:39:12,169  INFO [main] - Start submitting 1 batches
+2022-12-22 11:39:12,205  INFO [pool-1-thread-1] - waiting,batch_import_003/batch_aa,Tue Nov 01 00:15:00 CST 2022
+2022-12-22 11:39:12,922  INFO [pool-1-thread-1] - starting,batch_import_003/batch_aa
+2022-12-22 11:39:12,959  INFO [main] - All batches finished
+2022-12-22 11:40:33,852  INFO [main] - Connected to P8 Domain ICM532
+2022-12-22 11:40:33,857  INFO [main] - Start submitting 1 batches
+2022-12-22 11:40:33,897  INFO [pool-1-thread-1] - waiting,batch_import_003/batch_aa,Tue Nov 01 00:15:00 CST 2022
+2022-12-22 11:40:34,642  INFO [pool-1-thread-1] - starting,batch_import_003/batch_aa
+2022-12-22 11:40:36,709  INFO [pool-1-thread-1] - finished,batch_import_003/batch_aa
+2022-12-22 11:40:36,711  INFO [main] - All batches finished
+2022-12-22 12:12:00,953  INFO [main] - Connected to P8 Domain ICM532
+2022-12-22 12:12:00,958  INFO [main] - Start submitting 1 batches
+2022-12-22 12:12:00,992  INFO [pool-1-thread-1] - waiting,batch_import_003/batch_aa,Tue Nov 01 00:15:00 CST 2022
+2022-12-22 12:12:01,693  INFO [pool-1-thread-1] - starting,batch_import_003/batch_aa
+2022-12-22 12:12:02,236  INFO [pool-1-thread-1] - finished,batch_import_003/batch_aa
+2022-12-22 12:12:02,237  INFO [main] - All batches finished
+2022-12-22 12:13:01,416  INFO [main] - Connected to P8 Domain ICM532
+2022-12-22 12:13:01,421  INFO [main] - Start submitting 1 batches
+2022-12-22 12:13:01,465  INFO [pool-1-thread-1] - waiting,batch_import_003/batch_aa,Tue Nov 01 00:15:00 CST 2022
+2022-12-22 12:13:02,212  INFO [pool-1-thread-1] - starting,batch_import_003/batch_aa
+2022-12-22 12:13:02,752  INFO [pool-1-thread-1] - finished,batch_import_003/batch_aa
+2022-12-22 12:13:02,753  INFO [main] - All batches finished
+2022-12-22 12:14:22,026  INFO [main] - Connected to P8 Domain ICM532
+2022-12-22 12:14:22,031  INFO [main] - Start submitting 1 batches
+2022-12-22 12:14:22,068  INFO [pool-1-thread-1] - waiting,batch_import_003/batch_aa,Tue Nov 01 00:15:00 CST 2022
+2022-12-22 12:14:22,819  INFO [pool-1-thread-1] - starting,batch_import_003/batch_aa
+2022-12-22 12:14:23,415  INFO [pool-1-thread-1] - finished,batch_import_003/batch_aa
+2022-12-22 12:14:23,416  INFO [main] - All batches finished
+2022-12-22 12:15:51,373  INFO [main] - Connected to P8 Domain ICM532
+2022-12-22 12:15:51,379  INFO [main] - Start submitting 1 batches
+2022-12-22 12:15:51,415  INFO [pool-1-thread-1] - waiting,batch_import_003/batch_aa,Tue Nov 01 00:15:00 CST 2022
+2022-12-22 12:15:52,175  INFO [pool-1-thread-1] - starting,batch_import_003/batch_aa
+2022-12-22 12:15:52,704  INFO [pool-1-thread-1] - finished,batch_import_003/batch_aa
+2022-12-22 12:15:52,705  INFO [main] - All batches finished
+2022-12-22 12:17:10,663  INFO [main] - Connected to P8 Domain ICM532
+2022-12-22 12:17:10,668  INFO [main] - Start submitting 1 batches
+2022-12-22 12:17:10,706  INFO [pool-1-thread-1] - waiting,batch_import_003/batch_aa,Tue Nov 01 00:15:00 CST 2022
+2022-12-22 12:17:11,496  INFO [pool-1-thread-1] - starting,batch_import_003/batch_aa
+2022-12-22 12:17:12,963  INFO [pool-1-thread-1] - finished,batch_import_003/batch_aa
+2022-12-22 12:17:12,964  INFO [main] - All batches finished

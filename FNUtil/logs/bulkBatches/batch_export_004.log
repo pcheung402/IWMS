@@ -1,0 +1,64 @@
+2022-12-21 16:26:21,739 ERROR [main] - unhandled Exception
+2022-12-21 16:26:21,769 ERROR [main] - com.filenet.api.exception.EngineRuntimeException: FNRCA0031E: API_UNABLE_TO_USE_CONNECTION: The URI for server communication cannot be determined from the connection object http://10.114.132.164:9080/wsi/FNCEWS40MTOM. Message was: Connection timed out: connect
+2022-12-21 16:26:21,773  INFO [main] - Start submitting 1 batches
+2022-12-22 10:53:03,126  INFO [main] - Connected to P8 Domain ICRIS_PROD
+2022-12-22 10:53:03,131  INFO [main] - Start submitting 1 batches
+2022-12-22 10:53:03,169  INFO [pool-1-thread-1] - waiting,batch_export_004/batch_aa,Tue Nov 01 00:15:00 CST 2022
+2022-12-22 10:53:04,068  INFO [pool-1-thread-1] - starting,batch_export_004/batch_aa
+2022-12-22 10:53:06,069 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0100-CA9A-917D-DD41C5B325E1},ICRIS_CR_Doc_WORM
+2022-12-22 10:53:06,211 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0400-C529-85EB-A71C4F01294D},ICRIS_CR_Doc_WORM
+2022-12-22 10:53:06,365 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0400-C588-AEC2-208FA591FA21},ICRIS_CR_Doc_WORM
+2022-12-22 10:53:06,464 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0400-C6CE-B090-189C7F8F8358},ICRIS_CR_Doc_WORM
+2022-12-22 10:53:06,768 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0500-CD68-9DAE-93A40771A0B1},ICRIS_CR_Doc_WORM
+2022-12-22 10:53:06,768  INFO [pool-1-thread-1] - finished,batch_export_004/batch_aa
+2022-12-22 10:53:06,769  INFO [main] - All batches finished
+2022-12-22 10:54:11,375  INFO [main] - Connected to P8 Domain ICRIS_PROD
+2022-12-22 10:54:11,380  INFO [main] - Start submitting 1 batches
+2022-12-22 10:54:11,417  INFO [pool-1-thread-1] - waiting,batch_export_004/batch_aa,Tue Nov 01 00:15:00 CST 2022
+2022-12-22 10:54:12,240  INFO [pool-1-thread-1] - starting,batch_export_004/batch_aa
+2022-12-22 10:54:13,284 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0100-CA9A-917D-DD41C5B325E1},ICRIS_CR_Doc_WORM
+2022-12-22 10:54:13,362 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0400-C529-85EB-A71C4F01294D},ICRIS_CR_Doc_WORM
+2022-12-22 10:54:13,438 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0400-C588-AEC2-208FA591FA21},ICRIS_CR_Doc_WORM
+2022-12-22 10:54:13,497 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0400-C6CE-B090-189C7F8F8358},ICRIS_CR_Doc_WORM
+2022-12-22 10:54:13,610 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0500-CD68-9DAE-93A40771A0B1},ICRIS_CR_Doc_WORM
+2022-12-22 10:54:13,611  INFO [pool-1-thread-1] - finished,batch_export_004/batch_aa
+2022-12-22 10:54:13,611  INFO [main] - All batches finished
+2022-12-22 11:09:46,931  INFO [main] - Connected to P8 Domain ICRIS_PROD
+2022-12-22 11:09:46,935  INFO [main] - Start submitting 1 batches
+2022-12-22 11:09:46,971  INFO [pool-1-thread-1] - waiting,batch_export_004/batch_aa,Tue Nov 01 00:15:00 CST 2022
+2022-12-22 11:09:47,734  INFO [pool-1-thread-1] - starting,batch_export_004/batch_aa
+2022-12-22 11:09:48,645 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0100-CA9A-917D-DD41C5B325E1},ICRIS_CR_Doc_WORM
+2022-12-22 11:09:48,725 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0400-C529-85EB-A71C4F01294D},ICRIS_CR_Doc_WORM
+2022-12-22 11:09:48,790 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0400-C588-AEC2-208FA591FA21},ICRIS_CR_Doc_WORM
+2022-12-22 11:09:48,848 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0400-C6CE-B090-189C7F8F8358},ICRIS_CR_Doc_WORM
+2022-12-22 11:09:48,979 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0500-CD68-9DAE-93A40771A0B1},ICRIS_CR_Doc_WORM
+2022-12-22 11:09:48,979  INFO [pool-1-thread-1] - finished,batch_export_004/batch_aa
+2022-12-22 11:09:48,980  INFO [main] - All batches finished
+2022-12-22 11:20:01,011  INFO [main] - Connected to P8 Domain ICRIS_PROD
+2022-12-22 11:20:01,016  INFO [main] - Start submitting 1 batches
+2022-12-22 11:20:01,053  INFO [pool-1-thread-1] - waiting,batch_export_004/batch_aa,Tue Nov 01 00:15:00 CST 2022
+2022-12-22 11:20:01,796  INFO [pool-1-thread-1] - starting,batch_export_004/batch_aa
+2022-12-22 11:20:02,643 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0100-CA9A-917D-DD41C5B325E1},ICRIS_CR_Doc_WORM
+2022-12-22 11:20:02,742 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0400-C529-85EB-A71C4F01294D},ICRIS_CR_Doc_WORM
+2022-12-22 11:20:02,845 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0400-C588-AEC2-208FA591FA21},ICRIS_CR_Doc_WORM
+2022-12-22 11:20:02,922 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0400-C6CE-B090-189C7F8F8358},ICRIS_CR_Doc_WORM
+2022-12-22 11:20:03,070 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0500-CD68-9DAE-93A40771A0B1},ICRIS_CR_Doc_WORM
+2022-12-22 11:20:03,071  INFO [pool-1-thread-1] - finished,batch_export_004/batch_aa
+2022-12-22 11:20:03,071  INFO [main] - All batches finished
+2022-12-22 11:25:45,871  INFO [main] - Connected to P8 Domain ICRIS_PROD
+2022-12-22 11:25:45,876  INFO [main] - Start submitting 1 batches
+2022-12-22 11:25:45,915  INFO [pool-1-thread-1] - waiting,batch_export_004/batch_aa,Tue Nov 01 00:15:00 CST 2022
+2022-12-22 11:25:46,678  INFO [pool-1-thread-1] - starting,batch_export_004/batch_aa
+2022-12-22 11:25:47,687 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0100-CA9A-917D-DD41C5B325E1},ICRIS_CR_Doc_WORM
+2022-12-22 11:25:47,788 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0400-C529-85EB-A71C4F01294D},ICRIS_CR_Doc_WORM
+2022-12-22 11:25:47,863 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0400-C588-AEC2-208FA591FA21},ICRIS_CR_Doc_WORM
+2022-12-22 11:25:47,942 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0400-C6CE-B090-189C7F8F8358},ICRIS_CR_Doc_WORM
+2022-12-22 11:25:48,062 ERROR [pool-1-thread-1] - Invalid Document Class : {A0514B7C-0500-CD68-9DAE-93A40771A0B1},ICRIS_CR_Doc_WORM
+2022-12-22 11:25:48,062  INFO [pool-1-thread-1] - finished,batch_export_004/batch_aa
+2022-12-22 11:25:48,063  INFO [main] - All batches finished
+2022-12-22 11:31:00,498  INFO [main] - Connected to P8 Domain ICRIS_PROD
+2022-12-22 11:31:00,503  INFO [main] - Start submitting 1 batches
+2022-12-22 11:31:00,541  INFO [pool-1-thread-1] - waiting,batch_export_004/batch_aa,Tue Nov 01 00:15:00 CST 2022
+2022-12-22 11:31:01,277  INFO [pool-1-thread-1] - starting,batch_export_004/batch_aa
+2022-12-22 11:31:02,574  INFO [pool-1-thread-1] - finished,batch_export_004/batch_aa
+2022-12-22 11:31:02,575  INFO [main] - All batches finished

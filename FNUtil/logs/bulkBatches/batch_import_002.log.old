@@ -1,0 +1,33 @@
+2022-12-07 18:27:53,242  INFO [main] - Connected to P8 Domain ICM532
+2022-12-07 18:27:53,260  INFO [main] - Start submitting 10 batches
+2022-12-07 18:27:53,327  INFO [pool-1-thread-1] - waiting,batch_import_002/batch_aa,Tue Nov 01 00:15:00 CST 2022
+2022-12-07 18:27:53,340  INFO [pool-1-thread-2] - waiting,batch_import_002/batch_ab,Tue Nov 01 00:15:00 CST 2022
+2022-12-07 18:27:53,369  INFO [pool-1-thread-3] - waiting,batch_import_002/batch_ac,Tue Nov 01 00:15:00 CST 2022
+2022-12-07 18:27:53,380  INFO [pool-1-thread-4] - waiting,batch_import_002/batch_ad,Tue Nov 01 00:15:00 CST 2022
+2022-12-07 18:27:53,392  INFO [pool-1-thread-5] - waiting,batch_import_002/batch_ae,Tue Nov 01 00:15:00 CST 2022
+2022-12-07 18:27:53,412  INFO [pool-1-thread-6] - waiting,batch_import_002/batch_af,Tue Nov 01 00:15:00 CST 2022
+2022-12-07 18:27:53,418  INFO [pool-1-thread-7] - waiting,batch_import_002/batch_ag,Tue Nov 01 00:15:00 CST 2022
+2022-12-07 18:27:53,430  INFO [pool-1-thread-8] - waiting,batch_import_002/batch_ah,Tue Nov 01 00:15:00 CST 2022
+2022-12-07 18:27:53,441  INFO [pool-1-thread-9] - waiting,batch_import_002/batch_ai,Tue Nov 01 00:15:00 CST 2022
+2022-12-07 18:27:53,454  INFO [pool-1-thread-10] - waiting,batch_import_002/batch_aj,Tue Nov 01 00:15:00 CST 2022
+2022-12-07 18:27:54,869  INFO [pool-1-thread-2] - starting,batch_import_002/batch_ab
+2022-12-07 18:27:54,869  INFO [pool-1-thread-1] - starting,batch_import_002/batch_aa
+2022-12-07 18:27:54,869  INFO [pool-1-thread-6] - starting,batch_import_002/batch_af
+2022-12-07 18:27:54,869  INFO [pool-1-thread-4] - starting,batch_import_002/batch_ad
+2022-12-07 18:27:54,869  INFO [pool-1-thread-5] - starting,batch_import_002/batch_ae
+2022-12-07 18:27:54,869  INFO [pool-1-thread-9] - starting,batch_import_002/batch_ai
+2022-12-07 18:27:54,870  INFO [pool-1-thread-7] - starting,batch_import_002/batch_ag
+2022-12-07 18:27:54,870  INFO [pool-1-thread-8] - starting,batch_import_002/batch_ah
+2022-12-07 18:27:54,874  INFO [pool-1-thread-10] - starting,batch_import_002/batch_aj
+2022-12-07 18:27:54,875  INFO [pool-1-thread-3] - starting,batch_import_002/batch_ac
+2022-12-07 20:47:20,523  INFO [pool-1-thread-10] - finished,batch_import_002/batch_aj
+2022-12-07 22:03:58,904  INFO [pool-1-thread-8] - finished,batch_import_002/batch_ah
+2022-12-07 22:15:43,775  INFO [pool-1-thread-6] - finished,batch_import_002/batch_af
+2022-12-07 22:16:37,883  INFO [pool-1-thread-9] - finished,batch_import_002/batch_ai
+2022-12-07 22:18:32,603  INFO [pool-1-thread-3] - finished,batch_import_002/batch_ac
+2022-12-07 22:20:40,805  INFO [pool-1-thread-7] - finished,batch_import_002/batch_ag
+2022-12-07 22:21:56,047  INFO [pool-1-thread-2] - finished,batch_import_002/batch_ab
+2022-12-07 22:22:41,149  INFO [pool-1-thread-4] - finished,batch_import_002/batch_ad
+2022-12-07 22:23:42,649  INFO [pool-1-thread-1] - finished,batch_import_002/batch_aa
+2022-12-07 22:25:44,181  INFO [pool-1-thread-5] - finished,batch_import_002/batch_ae
+2022-12-07 22:25:44,294  INFO [main] - All batches finished

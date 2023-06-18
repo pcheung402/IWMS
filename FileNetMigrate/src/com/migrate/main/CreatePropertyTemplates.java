@@ -50,14 +50,14 @@ public class CreatePropertyTemplates {
 		
 		try {
 //			PropertiesList = csvParser.parser(new FileInputStream(new File("config\\properties_list.csv")));
-			log = new FNUtilLogger("CreatePropertyTemplates",null);
+			log = new FNUtilLogger("C:\temp");
 			revampedCPEUtil = new CPEUtil("revamped.server.conf", log);
 			objectStore = revampedCPEUtil.getObjectStore();
 			
-			File fXmlFile = new File( "." + File.separator + "config" + File.separator + "propertiesDefinitions.xml");
+//			File fXmlFile = new File((new CreatePropertyTemplates()).getClass().getClassLoader().getResource("propertiesDefinitions.xml").getPath());
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			Document doc = dBuilder.parse(fXmlFile);			
+			Document doc = dBuilder.parse((new CreatePropertyTemplates()).getClass().getClassLoader().getResourceAsStream("propertiesDefinitions.xml"));			
 			doc.getDocumentElement().normalize();
 			NodeList propertyNodeList = doc.getElementsByTagName("property");						
 			for (int j = 0; j < propertyNodeList.getLength(); j++) {

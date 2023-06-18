@@ -35,9 +35,9 @@ import com.fn.util.FNUtilLogger;
 
 public abstract class BulkOperationThread implements Runnable {
 	protected FNUtilLogger log;	
-	protected String batchSetId;
+	protected String batchBaseDir;
 	protected CPEUtil cpeUtil;
-	protected FileOutputStream bulkOperationOutputDataFile;
+//	protected FileOutputStream bulkOperationOutputDataFile;
 	protected String mode;	
 //	protected CSVParser csvParser;
 	protected Date batchStartTime;
@@ -58,7 +58,7 @@ public abstract class BulkOperationThread implements Runnable {
 
 
 	
-	public BulkOperationThread(String batchSetId, Document doc, FNUtilLogger log, FileOutputStream ofs, CPEUtil cpeUtil, HashMap<String, List<String>> classPropertiesMap, HashMap<String, String> propertyDefintion, String  mode) {
+	public BulkOperationThread(String batchBaseDir, Document doc, FNUtilLogger log, /*FileOutputStream ofs,*/ CPEUtil cpeUtil, HashMap<String, List<String>> classPropertiesMap, HashMap<String, String> propertyDefintion, String  mode) {
 //		this.classNumToSymNameMap.put(1, "ICRIS_Pend_Doc");
 //		this.classNumToSymNameMap.put(2, "ICRIS_Reg_Doc");
 //		this.classNumToSymNameMap.put(3, "ICRIS_Tmplt_Doc");
@@ -66,8 +66,8 @@ public abstract class BulkOperationThread implements Runnable {
 //		this.classNumToSymNameMap.put(5, "ICRIS_CR_Doc");
 //		this.classNumToSymNameMap.put(6, "ICRIS_BR_Doc");
 		this.log = log;
-		this.batchSetId = batchSetId;
-		this.bulkOperationOutputDataFile = ofs;
+		this.batchBaseDir = batchBaseDir;
+//		this.bulkOperationOutputDataFile = ofs;
 		this.classPropertiesMap = classPropertiesMap;
 		this.propertyDefintion = propertyDefintion;
 		this.mode = mode;
@@ -76,7 +76,7 @@ public abstract class BulkOperationThread implements Runnable {
 
 		try {
 			java.util.Properties props = new java.util.Properties();
-			props.load(new FileInputStream("config/batchSetConfig/" + this.batchSetId + ".conf"));
+			props.load(new FileInputStream(batchBaseDir + File.separator + "batch.conf"));
 			this.cpeUtil = cpeUtil;
 			loadBatchSetConfig();			
 //			initClassPropertiesMap();
@@ -128,6 +128,7 @@ public abstract class BulkOperationThread implements Runnable {
 				log.error(String.format("%s,%s,null", e.getMessage(), doc.get_Id(), doc.get_Name()));
 			} else {
 				Folder folder = (Folder)folderSet.iterator().next();
+				folder.fetchProperties(new String[] {"PathName"});
 				log.error(String.format("%s,%s,%s", e.getMessage(), doc.get_Id(), doc.get_Name(), folder.get_PathName()));
 			}
 		} 
@@ -137,7 +138,8 @@ public abstract class BulkOperationThread implements Runnable {
 		java.sql.Connection result = null;
 //		while (result == null) {
 			try {
-				result = DriverManager.getConnection(this.JDBCURL, this.dbuser, this.dbpassword);		
+				result = DriverManager.getConnection(this.JDBCURL, this.dbuser, this.dbpassword);
+				result.setAutoCommit(true);
 			}catch (SQLException e) {
 				e.printStackTrace();
 				System.exit(1);
@@ -150,6 +152,7 @@ public abstract class BulkOperationThread implements Runnable {
 //				}
 			} 
 //		}
+			
 		return result;
 		
 		
@@ -159,8 +162,8 @@ public abstract class BulkOperationThread implements Runnable {
 		SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 		try {
 			java.util.Properties props = new java.util.Properties();
-			props.load(new FileInputStream("config/batchSetConfig/" + this.batchSetId + ".conf"));
-			props.load(new FileInputStream("config/docdb.conf"));
+			props.load(new FileInputStream(this.batchBaseDir + File.separator + "batch.conf"));
+//			props.load(new FileInputStream("config/docdb.conf"));
 			this.batchStartTime = formatter.parse(props.getProperty("batchStartTime"));
 			this.batchEndTime = formatter.parse(props.getProperty("batchEndTime"));
 			this.queryString = props.getProperty("RegBarcodeQuery");
@@ -169,7 +172,7 @@ public abstract class BulkOperationThread implements Runnable {
 			this.dbpassword = props.getProperty("DOCDBPassword");
 			this.previewOnly = "TRUE".equalsIgnoreCase(props.getProperty("PreviewOnly", "False"))?Boolean.TRUE:Boolean.FALSE;
 		} catch (IOException e) {
-			throw new FNUtilException(FNUtilException.ExceptionCodeValue.BM_LOAD_BATCH_SET_CONFIG_ERROR,"Load batchSetConfig error : " + "config/batchSetConfig/" + this.batchSetId + ".conf", e);
+			throw new FNUtilException(FNUtilException.ExceptionCodeValue.BM_LOAD_BATCH_SET_CONFIG_ERROR,"Load batchSetConfig error : " + batchBaseDir + File.separator + "batch.conf", e);
 		} catch (ParseException e) {
 			throw new FNUtilException(FNUtilException.ExceptionCodeValue.BM_LOAD_BATCH_SET_CONFIG_ERROR,"BatchSetConfig time format error ", e);			
 		} catch (NumberFormatException e) {

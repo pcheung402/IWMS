@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -54,13 +55,14 @@ import com.migrate.impl.ExportImpl;
 import com.migrate.impl.RejectedExecutionHandlerImpl;
 public class Launcher {
 	
-	static String batchSetId, configFileName, className, mode=null;
+//	static String batchSetId;
+	static String batchBaseDir, guidListFileName, className, mode=null;
 	static Integer threads = 10;
 	static String folderPath="";
 	static String saName;
 	static FNUtilLogger log;
 	static CPEUtil cpeUtil;	
-	static FileOutputStream bulkOperationOutputDataFile;
+//	static FileOutputStream bulkOperationOutputDataFile;
 	static Class<?> bulkOperationClass;
 	static Date batchStartTime, batchEndTime;
 	static  HashMap<String, String> propertyDefintion;
@@ -90,7 +92,8 @@ public class Launcher {
 		waitToStart();
 		
 		if("ByGUID".equalsIgnoreCase(mode)) {
-			BufferedReader reader = new BufferedReader(new FileReader( "." + File.separator + "data" + File.separator + "bulkBatches" + File.separator + batchSetId +".dat"));
+//			BufferedReader reader = new BufferedReader(new FileReader( "." + File.separator + "data" + File.separator + "bulkBatches" + File.separator + batchSetId +".dat"));
+			BufferedReader reader = new BufferedReader(new FileReader(batchBaseDir + File.separator + guidListFileName));
 			for(String line; (line=reader.readLine())!=null;){
     			Date date = new Date();
     			if (date.after(batchEndTime)) {
@@ -110,12 +113,12 @@ public class Launcher {
 	    			{String.class,
 	    			Document.class,
 	    			FNUtilLogger.class,
-	    			FileOutputStream.class,
+//	    			FileOutputStream.class,
 	    			CPEUtil.class,
 	    			HashMap.class,
 	    			HashMap.class,
 	    			String.class});	
-	    			executorPool.execute((Runnable) cons.newInstance(new Object[] {batchSetId, doc, log, bulkOperationOutputDataFile,  cpeUtil, classPropertiesMap, propertyDefintion, mode}));	
+	    			executorPool.execute((Runnable) cons.newInstance(new Object[] {batchBaseDir, doc, log, /*bulkOperationOutputDataFile,*/  cpeUtil, classPropertiesMap, propertyDefintion, mode}));	
     			} else {
     				log.error(String.format("No Content File, %s, %s", doc.get_Id().toString(), doc.get_ClassDescription().get_SymbolicName()));
     			}
@@ -139,7 +142,7 @@ public class Launcher {
         SearchScope searchScope = new SearchScope(cpeUtil.getObjectStore());
         System.out.println ("Start retrieving : " + new Date());
         DocumentSet docSet = (DocumentSet)searchScope.fetchObjects(sqlObject,null,null ,Boolean.TRUE );
-		log.info(String.format("start,%s",batchSetId));
+		log.info(String.format("start,%s",batchBaseDir));
         PageIterator pageIter= docSet.pageIterator();
         pageIter.setPageSize(1000);
         while (pageIter.nextPage()) {
@@ -157,12 +160,12 @@ public class Launcher {
 	    			{String.class,
 	    			Document.class,
 	    			FNUtilLogger.class,
-	    			FileOutputStream.class,
+//	    			FileOutputStream.class,
 	    			CPEUtil.class,
 	    			HashMap.class,
 	    			HashMap.class,
 	    			String.class});	
-	    			executorPool.execute((Runnable) cons.newInstance(new Object[] {batchSetId, doc, log, bulkOperationOutputDataFile,  cpeUtil, classPropertiesMap, propertyDefintion, mode}));
+	    			executorPool.execute((Runnable) cons.newInstance(new Object[] {batchBaseDir, doc, log, /*bulkOperationOutputDataFile,*/  cpeUtil, classPropertiesMap, propertyDefintion, mode}));
     			} else {
     				log.error(String.format("No Content File, %s, %s", doc.get_Id().toString(), doc.get_ClassDescription().get_SymbolicName()));
     			}
@@ -172,12 +175,12 @@ public class Launcher {
 		executorPool.shutdown();	// orderly shutdown
 		
 		boolean finished = executorPool.awaitTermination(10, TimeUnit.SECONDS);	// wait until shutdown completed		
-		bulkOperationOutputDataFile.flush();
-		bulkOperationOutputDataFile.close();
+//		bulkOperationOutputDataFile.flush();
+//		bulkOperationOutputDataFile.close();
 		if (isOverdue) {
-			log.info(String.format("overdue,%s",batchSetId));
+			log.info(String.format("overdue %s",batchBaseDir));
 		} else {
-			log.info(String.format("finished,%s",batchSetId));
+			log.info(String.format("finished %s",batchBaseDir));
 		}
 	}
 	
@@ -207,13 +210,13 @@ public class Launcher {
 //		
 //		
         Options options = new Options();
-        Option optionBatchSetId = new Option("b", "batch", true, "batch id");
-        optionBatchSetId.setRequired(true);
-        options.addOption(optionBatchSetId);
+        Option optionBatchBaseDir = new Option("b", "basedir", true, "batch base directory");
+        optionBatchBaseDir.setRequired(true);
+        options.addOption(optionBatchBaseDir);
         
-        Option configFile = new Option("c", "config", true, "configuration file name");
-        configFile.setRequired(true);
-        options.addOption(configFile);
+//        Option configFile = new Option("c", "config", true, "configuration file name");
+//        configFile.setRequired(true);
+//        options.addOption(configFile);
         
         Option docClass = new Option("d", "class", true, "document class");
         docClass.setRequired(true);
@@ -228,7 +231,7 @@ public class Launcher {
         bySA.setRequired(false);
         options.addOption(bySA);
         
-        Option byGUID = new Option("g", "guid", false, "by GUID");
+        Option byGUID = new Option("g", "guid", true, "by GUID");
         byGUID.setRequired(false);
         options.addOption(byGUID);
         
@@ -244,7 +247,7 @@ public class Launcher {
 
         try {
         	CommandLine cmd = parser.parse(options, args);
-            batchSetId = cmd.getOptionValue("batch");
+            batchBaseDir = cmd.getOptionValue("basedir");
             mode = "ByFolder";
             if(cmd.hasOption("f")) {
             	mode = "ByFolder";
@@ -254,8 +257,9 @@ public class Launcher {
             	saName = cmd.getOptionValue("sa");
             } else if(cmd.hasOption("g")) {          	
             	mode = "ByGUID";
+            	guidListFileName = cmd.getOptionValue("guid");
             }
-            configFileName = cmd.getOptionValue("config");
+//            configFileName = cmd.getOptionValue("config");
             className = cmd.getOptionValue("class");
             
             if (cmd.hasOption("t")) 
@@ -278,8 +282,8 @@ public class Launcher {
 		try {
 			bulkOperationClass = Class.forName(bulkOPerationClassName);
 			java.util.Properties props = new java.util.Properties();
-			props.load(new FileInputStream("config/batchSetConfig/" + batchSetId + ".conf"));
-			props.load(new FileInputStream("config/docdb.conf"));
+			props.load(new FileInputStream(batchBaseDir + File.separator + "batch.conf"));
+//			props.load(new FileInputStream("config/docdb.conf"));
 			batchStartTime = dateFormatter.parse(props.getProperty("batchStartTime"));
 			batchEndTime = dateFormatter.parse(props.getProperty("batchEndTime"));
 		} catch (ClassNotFoundException e1) {
@@ -290,12 +294,12 @@ public class Launcher {
 		
 
 		try {
-			log = new FNUtilLogger(batchSetId,"bulkBatches");
-			cpeUtil = new CPEUtil(configFileName, log);
+			log = new FNUtilLogger(batchBaseDir);
+			cpeUtil = new CPEUtil(batchBaseDir + File.separator + "batch.conf", log);
 			log.info("Connected to P8 Domain "+ cpeUtil.getDomain().get_Name());
-			String bulkMoveOutputFilePath = "." + File.separator + "data" + File.separator + "bulkOutput" + File.separator + batchSetId +".dat";
-			Files.deleteIfExists(Paths.get(bulkMoveOutputFilePath));
-			bulkOperationOutputDataFile = new FileOutputStream(bulkMoveOutputFilePath, true);
+//			String bulkMoveOutputFilePath = "." + File.separator + "data" + File.separator + "bulkOutput" + File.separator + batchSetId +".dat";
+//			Files.deleteIfExists(Paths.get(bulkMoveOutputFilePath));
+//			bulkOperationOutputDataFile = new FileOutputStream(bulkMoveOutputFilePath, true);
 		} catch (FNUtilException e) {
 			if (e.exceptionCode.equals(FNUtilException.ExceptionCodeValue.CPE_CONFIG_FILE_NOT_FOUND)) {
 				log.error(e.getMessage());				
@@ -303,6 +307,7 @@ public class Launcher {
 				log.error(e.getMessage());				
 			} 
 		} catch (Exception e) {
+			e.printStackTrace();
 			log.error("unhandled Exception");
 			log.error(e.toString());
 		}
@@ -313,10 +318,12 @@ public class Launcher {
 	
 	private static void initClassPropertiesMap() throws ParserConfigurationException, SAXException, IOException {
 		classPropertiesMap = new HashMap<String, List<String>>();
-		File fXmlFile = new File( "." + File.separator + "config" + File.separator + "classesPropertiesMap.xml");
+//		URL url = (new Launcher()).getClass().getClassLoader().getResource("classesPropertiesMap.xml")
+//		File fXmlFile = new File( "." + File.separator + "config" + File.separator + "classesPropertiesMap.xml");
+//		File fXmlFile = new File(new URL(""));
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		org.w3c.dom.Document doc = dBuilder.parse(fXmlFile);			
+		org.w3c.dom.Document doc = dBuilder.parse((new Launcher()).getClass().getClassLoader().getResourceAsStream("classesPropertiesMap.xml"));			
 		doc.getDocumentElement().normalize();
 		NodeList classNodeList = doc.getElementsByTagName("docClass");						
 		for (int j = 0; j < classNodeList.getLength(); j++) {
@@ -341,11 +348,11 @@ public class Launcher {
 	}
 	
 	private static void initPropertyDefinition() throws ParserConfigurationException, SAXException, IOException {
-		propertyDefintion = new HashMap<String, String>();
-		File fXmlFile = new File( "." + File.separator + "config" + File.separator + "propertiesDefinitions.xml");
+		propertyDefintion = new HashMap<String, String>();		
+//		File fXmlFile = new File((new Launcher()).getClass().getClassLoader().getResource("propertiesDefinitions.xml").getPath());
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		org.w3c.dom.Document doc = dBuilder.parse(fXmlFile);			
+		org.w3c.dom.Document doc = dBuilder.parse((new Launcher()).getClass().getClassLoader().getResourceAsStream("propertiesDefinitions.xml"));			
 		doc.getDocumentElement().normalize();
 		NodeList propertyNodeList = doc.getElementsByTagName("property");						
 		for (int j = 0; j < propertyNodeList.getLength(); j++) {
@@ -360,7 +367,7 @@ public class Launcher {
 	}
 	
 	private static void waitToStart() {
-		log.info(String.format("waiting %s,%s",batchSetId, batchStartTime.toString()));
+		log.info(String.format("waiting %s",batchBaseDir));
 		try {
 			Date curDate = new Date();
 			TimeUnit.MILLISECONDS.sleep(batchStartTime.getTime() - curDate.getTime());

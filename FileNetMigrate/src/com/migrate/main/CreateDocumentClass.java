@@ -55,13 +55,13 @@ public class CreateDocumentClass {
 
 		// TODO Auto-generated method stub
 		try {
-			log = new FNUtilLogger("CreateDocumentClass",null);
+			log = new FNUtilLogger("C:\temp");
 			revampedCPEUtil = new CPEUtil("revamped.server.conf",log);
-			objectStore = revampedCPEUtil.getObjectStore();
-			File fXmlFile = new File( "." + File.separator + "config" + File.separator + "classesDefinitions.xml");
+			objectStore = revampedCPEUtil.getObjectStore();			
+//			File fXmlFile = new File((new CreateDocumentClass()).getClass().getClassLoader().getResource("classesDefinitions.xml").getPath());
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			Document doc = dBuilder.parse(fXmlFile);			
+			Document doc = dBuilder.parse((new CreateDocumentClass()).getClass().getClassLoader().getResourceAsStream("classesDefinitions.xml"));			
 			doc.getDocumentElement().normalize();
 			NodeList classNodeList = doc.getElementsByTagName("docClass");						
 			for (int j = 0; j < classNodeList.getLength(); j++) {

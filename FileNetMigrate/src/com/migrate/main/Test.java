@@ -29,8 +29,8 @@ public class Test {
 //		UserContext.get().pushSubject(subj);
 //		System.out.println("Connected");
 //		
-		FNUtilLogger log = new FNUtilLogger("batch001","bulkBatches");
-		CPEUtil cpeUtil = new CPEUtil("mmatsts22.server.conf", log);
+		FNUtilLogger log = new FNUtilLogger("C:\\temp");
+		CPEUtil cpeUtil = new CPEUtil("C:\\Users\\pcheung\\Documents\\iwms_batches\\batch_001\\batch.conf", log);
 		log.info("Connected to P8 Domain "+ cpeUtil.getDomain().get_Name());
 		
         SearchSQL sqlObject = new SearchSQL();

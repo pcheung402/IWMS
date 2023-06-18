@@ -64,7 +64,7 @@ public class CPEUtil {
 	
 	public CPEUtil(String configFile,FNUtilLogger log) throws FNUtilException, ParserConfigurationException{
 		this.log = log;
-		CONF_FILE_DIR = "." + File.separator + "config" + File.separator + configFile;
+		CONF_FILE_DIR = /*"." + File.separator + "config" + File.separator + */configFile;
 		System.out.println("configure file : " + CONF_FILE_DIR);
 		try {
 //			semFileStore = new Semaphore(1, true);

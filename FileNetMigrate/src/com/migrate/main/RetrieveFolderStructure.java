@@ -33,7 +33,7 @@ public class RetrieveFolderStructure {
 	static private java.sql.Connection conn;
 	public static void main(String[] args) throws ClassNotFoundException, FNUtilException, ParserConfigurationException, FileNotFoundException, IOException, SQLException {
 		// TODO Auto-generated method stub
-		log = new FNUtilLogger("buildFolderStructure","bulkBatches");
+		log = new FNUtilLogger("C:\\temp");
 		cpeUtil = new CPEUtil("mmatsts22.server.conf", log);
 		log.info("Connected");
 		java.util.Properties props = new java.util.Properties();

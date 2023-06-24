@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.IOException;
+import java.sql.BatchUpdateException;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -33,6 +34,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Element;
 
+import com.filenet.api.admin.StorageArea;
 import com.filenet.api.collection.AnnotationSet;
 import com.filenet.api.collection.ContentElementList;
 import com.filenet.api.collection.DocumentSet;
@@ -54,7 +56,9 @@ import com.filenet.api.util.Id;
 import com.filenet.api.util.UserContext;
 import com.fn.util.CPEUtil;
 import com.fn.util.FNUtilException;
+import com.fn.util.FNUtilException.ExceptionCodeValue;
 import com.fn.util.FNUtilLogger;
+import com.fn.util.FNExportStatus;
 import com.migrate.abs.BulkOperationThread;
 
 public class ExportImpl extends BulkOperationThread {
@@ -92,8 +96,8 @@ public class ExportImpl extends BulkOperationThread {
 	Element propertiesNode;
 	Element contentsNode;
 	String docSubDir;
-	public ExportImpl(String batchBaseDir, Document doc, FNUtilLogger log, /*FileOutputStream ofs,*/ CPEUtil cpeUtil, HashMap<String, List<String>> classPropertiesMap, HashMap<String, String> propertyDefintion, String mode) {
-		super(batchBaseDir, doc, log, /*ofs,*/ cpeUtil,classPropertiesMap, propertyDefintion, mode);
+	public ExportImpl(String batchBaseDir, Document doc, FNUtilLogger log, CPEUtil cpeUtil, HashMap<String, List<String>> classPropertiesMap, HashMap<String, String> propertyDefintion, String mode) {
+		super(batchBaseDir, doc, log, cpeUtil,classPropertiesMap, propertyDefintion, mode);
 		// TODO Auto-generated constructor stub
 		this.docSubDir = this.batchBaseDir + File.separator + "documents" + File.separator + getDocSubDir(doc.get_Id().toString());
 		
@@ -101,7 +105,7 @@ public class ExportImpl extends BulkOperationThread {
 	
 
 	public void processBatchItem(Document doc) throws FNUtilException, IOException, SQLException {
-		
+
 		try {
 			this.factory = DocumentBuilderFactory.newInstance();
 			this.builder = factory.newDocumentBuilder();
@@ -113,6 +117,7 @@ public class ExportImpl extends BulkOperationThread {
 		}
 		ClassDescription cd = doc.get_ClassDescription();
 		String classSymbolicName = cd.get_SymbolicName();
+		String classDisplayName = cd.get_DisplayName();
 
 		if(createDocument(doc)) {
 //			System.out.println("document created");
@@ -128,7 +133,7 @@ public class ExportImpl extends BulkOperationThread {
 		        DOMSource source = new DOMSource(this.xmlDoc);
 //		        String xmlFilePath = "." + File.separator + "data" + File.separator + "bulkOutput" + File.separator + doc.get_Id().toString() +".xml";
 //		        String xmlFilePath = this.batchBaseDir + File.separator + "documents" + File.separator + doc.get_Id().toString();
-		        Files.createDirectories(Paths.get(this.batchBaseDir));
+		        Files.createDirectories(Paths.get(this.docSubDir));
 		        FileOutputStream output = new FileOutputStream(docSubDir + File.separator + "properties.xml");
 		        StreamResult result = new StreamResult(output);
 		        transformer.transform(source, result);			
@@ -145,14 +150,21 @@ public class ExportImpl extends BulkOperationThread {
 	
 	
 	private Boolean createDocument(Document doc) throws SQLException {
-		PreparedStatement deleteDocumentStatement = conn.prepareStatement("DELETE FROM DOCUMENT_DB.DOCUMENT OBJECT_ID=UUID_TO_BIN(?)");
+//		System.out.println("1111111111111111");	
+		PreparedStatement deleteDocumentStatement = conn.prepareStatement("DELETE FROM DOCUMENT_DB.DOCUMENT WHERE OBJECT_ID=UUID_TO_BIN(?)");
+//		System.out.println("2222222222222222");	
 		deleteDocumentStatement.setString(1, doc.get_Id().toString());
+//		System.out.println(deleteDocumentStatement);	
 		deleteDocumentStatement.execute();
+//		System.out.println("3333333333333333");	
 		Boolean result = Boolean.FALSE;
 		propertiesNode = this.xmlDoc.createElement("Properties");
 		ClassDescription cd = doc.get_ClassDescription();
 		String classSymbolicName = cd.get_SymbolicName();
+		
 		PreparedStatement insertStatement = pepareInsertStatement(doc, classSymbolicName);
+		
+
 		
 		if(insertStatement!=null) {
 			insertStatement.execute();
@@ -181,7 +193,7 @@ public class ExportImpl extends BulkOperationThread {
 	}
 	
 	private PreparedStatement pepareInsertStatement(Document doc, String classSymbolicName) throws SQLException {
-		
+	
 		String[] propertiesNameArray = classPropertiesMap.get(classSymbolicName).toArray(new String[0]);
 		ArrayList<String>  singleValuedProperties = new ArrayList<String>();
 		ArrayList<String>  multiValuedProperties = new ArrayList<String>();
@@ -205,7 +217,7 @@ public class ExportImpl extends BulkOperationThread {
 				multiValuedProperties.add(propertiesNameArray[i]);
 			}
 		}
-		
+
 		if(classPropertiesMap.get(classSymbolicName)==null) {
 			log.error(String.format("Invalid Document Class : %s,%s", doc.get_Id().toString(), classSymbolicName));
 			return null;
@@ -215,6 +227,7 @@ public class ExportImpl extends BulkOperationThread {
 			Properties docProperties = doc.getProperties();
 			Id vsId = doc.get_VersionSeries().get_Id();
 			SecurityPolicy securityPolicy = doc.get_SecurityPolicy();
+			securityPolicy.fetchProperties(new String[] {"DisplayName"});
 			Date dateCreated = doc.get_DateCreated();
 			Date dateLastModified = doc.get_DateLastModified();
 			
@@ -228,7 +241,9 @@ public class ExportImpl extends BulkOperationThread {
 					"SECURITY_POLICY",
 					"CLASS_SYMBOLIC_NAME",
 					"DOCUMENTTITLE",
-					"MIME_TYPE"	
+					"MIME_TYPE",
+					"SECURITY_NAME",
+					"STORAGE_AREA_NAME"
 			};
 
 			String queryString= "REPLACE INTO DOCUMENT_DB.DOCUMENT ("
@@ -236,7 +251,7 @@ public class ExportImpl extends BulkOperationThread {
 					+ String.join(",", sysProperties)
 					+ "," 
 					+ String.join(",", singleValuedProperties)									
-					+ ") VALUES (UUID_TO_BIN(?),UUID_TO_BIN(?),?,?,?,?,UUID_TO_BIN(?),?,?,?";
+					+ ") VALUES (UUID_TO_BIN(?),UUID_TO_BIN(?),?,?,?,?,UUID_TO_BIN(?),?,?,?,?,?";
 			
 //			queryString += ",?".repeat(singleValuedProperties.size());
 			for (String s:singleValuedProperties) {
@@ -245,7 +260,7 @@ public class ExportImpl extends BulkOperationThread {
 		
 		
 			queryString += ")";
-			
+;			
 			PreparedStatement insertStatement = conn.prepareCall(queryString);
 			
 			insertStatement.setString(1, doc.get_Id().toString());
@@ -414,9 +429,33 @@ public class ExportImpl extends BulkOperationThread {
 			
 			propertiesNode.appendChild(mimePropertyNode);
 			
+			StorageArea sa = doc.get_StorageArea();
+			sa.fetchProperties(new String[] {"DisplayName"});
+ 			String storageAreaName = sa.get_DisplayName();
+			insertStatement.setString(12, storageAreaName);
+			
+			Element storageAreaPropertyNode = this.xmlDoc.createElement("Property");
+			Element storageAreaNode = this.xmlDoc.createElement("Name");
+			storageAreaNode.setTextContent("STORAGE_AREA");
+			storageAreaPropertyNode.appendChild(storageAreaNode);
+			
+			Element storageAreaTypeNode = this.xmlDoc.createElement("Type");
+			storageAreaTypeNode.setTextContent("String");
+			storageAreaPropertyNode.appendChild(storageAreaTypeNode);
+			
+			Element storageAreValueNode = this.xmlDoc.createElement("Value");
+			storageAreValueNode.setTextContent(storageAreaName);
+			storageAreaPropertyNode.appendChild(storageAreValueNode);
+			
+			propertiesNode.appendChild(storageAreaPropertyNode);			
+
+			
+			
+			
 //			System.out.println(queryString);
 //			System.out.println("***" + classSymbolicName);
-			Integer pos = 11;
+//			Integer pos = 11;
+			Integer pos = sysProperties.length + 1;
 			for (String s: singleValuedProperties) {
 				Object docProperty= docProperties.getObjectValue(s);
 				String dataType = propertyDefintion.get(s);
@@ -554,12 +593,11 @@ public class ExportImpl extends BulkOperationThread {
 			if(securityPolicy!=null) {
 
 				insertStatement.setString(7, securityPolicy.get_Id().toString());
+				insertStatement.setString(11, securityPolicy.get_DisplayName());
 				Element securityPolicyNode = this.xmlDoc.createElement("Security");
 				securityPolicyNode.setTextContent(securityPolicy.get_Name());
 				docNode.appendChild(securityPolicyNode);
-			} else {
-				insertStatement.setString(7, null);
-			}
+			} 
 //		System.out.println(insertStatement.toString());
 		return insertStatement;
 		}
@@ -603,6 +641,8 @@ public class ExportImpl extends BulkOperationThread {
 				valueNode.setTextContent(str);
 				propertyNode.appendChild(valueNode);				
 			}
+			
+//			System.out.println(insertStatement.toString());
 			insertStatement.executeBatch();
 			insertStatement.close();
 //			try {
@@ -616,58 +656,80 @@ public class ExportImpl extends BulkOperationThread {
 				
 
 	}
-	private void addContent(Document doc) throws SQLException, IOException {
-//		this.contentsNode = this.xmlDoc.createElement("Contents");
-//		PreparedStatement deleteContentStatement = conn.prepareStatement("DELETE FROM DOCUMENT_DB.CONTENT WHERE DOCUMENT_OBJECT_ID=UUID_TO_BIN(?)");
-//		deleteContentStatement.setString(1, doc.get_Id().toString());
-//		deleteContentStatement.execute();
-		
-		String queryString= "INSERT INTO DOCUMENT_DB.CONTENT (OBJECT_ID, DOCUMENT_OBJECT_ID, ESN, CONTENT_TYPE, RETRIEVAL_NAME, CONTENT) VALUES (UUID_TO_BIN(UUID()), UUID_TO_BIN(?), ?, ?, ? , ?)";
-		PreparedStatement insertStatement = conn.prepareStatement(queryString);
-		
-		ContentElementList cel = doc.get_ContentElements();
-		Iterator<ContentTransfer> it = cel.iterator();
-		while(it.hasNext()) {
-			ContentTransfer ct = it.next();
-			doc.fetchProperties(new String[] {"RetrievalName","ElementSequenceNumber"});
-			InputStream is = ct.accessContentStream();
+	private void addContent(Document doc) throws SQLException {
+		if (doc.get_ContentElements().iterator().hasNext()) {
+			this.contentsNode = this.xmlDoc.createElement("Contents");
+//			PreparedStatement deleteContentStatement = conn.prepareStatement("DELETE FROM DOCUMENT_DB.CONTENT WHERE DOCUMENT_OBJECT_ID=UUID_TO_BIN(?)");
+//			deleteContentStatement.setString(1, doc.get_Id().toString());
+//			deleteContentStatement.execute();
 			
-//			String filePath = "." + File.separator + "data" + File.separator + "bulkOutput" + File.separator + doc.get_Id().toString() + "_" + ct.get_RetrievalName();
-			String filePath = this.docSubDir + File.separator + "contents" /*+ File.separator + doc.get_Id().toString() + "_" + ct.get_RetrievalName()*/;
-			Files.createDirectories(Paths.get(filePath));
-			File file = new File(filePath + File.separator + doc.get_Id().toString() + "_" + ct.get_RetrievalName());
-			FileOutputStream os = new FileOutputStream(file, false);
-            int read;
-            byte[] bytes = new byte[8192];
-            while ((read = is.read(bytes)) != -1) {
-                os.write(bytes, 0, read);
-            }
-            os.close();
-            is.close();
-            is = ct.accessContentStream();
-			Element content = this.xmlDoc.createElement("Content");
-			Element esn = this.xmlDoc.createElement("ESN");
-			esn.setTextContent(String.valueOf(ct.get_ElementSequenceNumber()));
-			Element annot_path = this.xmlDoc.createElement("Path");
-			annot_path.setTextContent(file.getPath());
-			content.appendChild(esn);
-			content.appendChild(annot_path);
-			this.contentsNode.appendChild(content);
+			String queryString= "INSERT INTO DOCUMENT_DB.CONTENT (OBJECT_ID, DOCUMENT_OBJECT_ID, ESN, CONTENT_TYPE, RETRIEVAL_NAME, CONTENT) VALUES (UUID_TO_BIN(UUID()), UUID_TO_BIN(?), ?, ?, ? , ?)";
+			PreparedStatement insertStatement = conn.prepareStatement(queryString);
 			
-			insertStatement.setString(1, doc.get_Id().toString());
-			insertStatement.setInt(2, ct.get_ElementSequenceNumber());
-			insertStatement.setString(3, ct.get_ContentType());
-			insertStatement.setString(4, ct.get_RetrievalName());
-			insertStatement.setBinaryStream(5, is);
-			insertStatement.addBatch();
+			ContentElementList cel = doc.get_ContentElements();
+			Iterator<ContentTransfer> it = cel.iterator();
+			while(it.hasNext()) {
+				ContentTransfer ct = it.next();
+				doc.fetchProperties(new String[] {"RetrievalName","ElementSequenceNumber"});
+				try {
+					InputStream is = ct.accessContentStream();
+//					String filePath = "." + File.separator + "data" + File.separator + "bulkOutput" + File.separator + doc.get_Id().toString() + "_" + ct.get_RetrievalName();
+					String filePath = this.docSubDir + File.separator + "contents" /*+ File.separator + doc.get_Id().toString() + "_" + ct.get_RetrievalName()*/;
+					Files.createDirectories(Paths.get(filePath));
+					File file = new File(filePath + File.separator + doc.get_Id().toString() + "_" + ct.get_RetrievalName());
+					FileOutputStream os = new FileOutputStream(file, false);
+		            int read;
+		            byte[] bytes = new byte[8192];
+		            while ((read = is.read(bytes)) != -1) {
+		                os.write(bytes, 0, read);
+		            }
+		            os.close();
+		            is.close();
+		            is = ct.accessContentStream();
+					Element content = this.xmlDoc.createElement("Content");
+					Element esn = this.xmlDoc.createElement("ESN");
+					esn.setTextContent(String.valueOf(ct.get_ElementSequenceNumber()));
+					Element annot_path = this.xmlDoc.createElement("Path");
+					annot_path.setTextContent(file.getPath());
+					content.appendChild(esn);
+					content.appendChild(annot_path);
+//					System.out.println("### " + contentsNode.toString());
+//					System.out.println("***  "+content.toString());
+					this.contentsNode.appendChild(content);
+					
+					insertStatement.setString(1, doc.get_Id().toString());
+					insertStatement.setInt(2, ct.get_ElementSequenceNumber());
+					insertStatement.setString(3, ct.get_ContentType());
+					insertStatement.setString(4, ct.get_RetrievalName());
+					insertStatement.setBinaryStream(5, is);
+					insertStatement.addBatch();	
+				} catch (EngineRuntimeException e) {
+					if(e.getExceptionCode()==ExceptionCode.CONTENT_FCA_FILE_DOES_NOT_EXIST) {
+						log.error(String.format("%d,%s,%s,%s",FNExportStatus.EXPORT_CONTENT_ERROR,doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
+						updateDocumentExportStatus(doc, FNExportStatus.EXPORT_CONTENT_ERROR);
+					}
+					else 
+						throw e;
+				} catch (IOException e) {
+					log.error(String.format("%d,%s,%s,%s",FNExportStatus.EXPORT_CONTENT_ERROR,doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
+						updateDocumentExportStatus(doc, FNExportStatus.EXPORT_CONTENT_ERROR);
+				}
 			
-
-
-			
+			}
+			try {
+				insertStatement.executeBatch();
+			} catch (BatchUpdateException e) {
+				log.error(String.format("%d,%s,%s,%s",FNExportStatus.INSERT_CONTENT_ERROR, doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
+				updateDocumentExportStatus(doc, FNExportStatus.INSERT_CONTENT_ERROR);
+			}			
+			insertStatement.close();
+			this.docNode.appendChild(contentsNode);			
+		} else {
+			log.error(String.format("%d,%s,%s,%s",FNExportStatus.NO_CONTENT_FILE,doc.get_StorageArea().get_DisplayName(), "No Content FIle", doc.get_Id().toString()));
+			updateDocumentExportStatus(doc, FNExportStatus.NO_CONTENT_FILE);
+//			log.error(String.format("No Content File, %s, %s", doc.get_Id().toString(), doc.get_ClassDescription().get_SymbolicName()));
 		}
-		insertStatement.executeBatch();
-		insertStatement.close();
-		this.docNode.appendChild(contentsNode);
+
 	}
 	
 	
@@ -720,24 +782,36 @@ public class ExportImpl extends BulkOperationThread {
 			Iterator<ContentTransfer> it1 = annotCEL.iterator();
 			while(it1.hasNext()) {
 				Element annotPathNode = this.xmlDoc.createElement("Annotation_Path");
-				ContentTransfer ct = it1.next();
-
 				String filePath = this.docSubDir + File.separator + "annoations";
 				Files.createDirectories(Paths.get(filePath));
+				ContentTransfer ct = it1.next();
 				File file = new File(filePath + File.separator + annot.get_Id().toString() + "_" + ct.get_RetrievalName());
-				
-//				String filePath = "." + File.separator + "data" + File.separator + "bulkOutput" + File.separator + "annotation_" + annot.get_Id().toString() +"_"+String.valueOf(ct.get_ElementSequenceNumber()+".xml");
-//				File file = new File(filePath);
-				FileOutputStream os = new FileOutputStream(file, false);
-				InputStream is = ct.accessContentStream();
-	            int read;
-	            byte[] bytes = new byte[8192];
-	            while ((read = is.read(bytes)) != -1) {
-	                os.write(bytes, 0, read);
-	            }
-	            os.close();
-	            is.close();
-				
+				InputStream is = null;
+				FileOutputStream os = null;
+				try {
+					is = ct.accessContentStream();					
+	//				String filePath = "." + File.separator + "data" + File.separator + "bulkOutput" + File.separator + "annotation_" + annot.get_Id().toString() +"_"+String.valueOf(ct.get_ElementSequenceNumber()+".xml");
+	//				File file = new File(filePath);
+					os = new FileOutputStream(file, false);
+					
+		            int read;
+		            byte[] bytes = new byte[8192];
+		            while ((read = is.read(bytes)) != -1) {
+		                os.write(bytes, 0, read);
+		            }
+		            os.close();
+		            is.close();
+				} catch (EngineRuntimeException e) {
+					if(e.getExceptionCode()==ExceptionCode.CONTENT_FCA_FILE_DOES_NOT_EXIST)
+						log.error(String.format("%d,%s,%s,%s",FNExportStatus.EXPORT_ANNOTATION_ERROR, doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
+						updateDocumentExportStatus(doc, FNExportStatus.EXPORT_ANNOTATION_ERROR);
+						
+				} catch (IOException e) {
+					log.error(String.format("%d,%s,%s,%s",FNExportStatus.EXPORT_ANNOTATION_ERROR, doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
+					updateDocumentExportStatus(doc, FNExportStatus.EXPORT_ANNOTATION_ERROR);
+				}
+
+
 				addAnnotContentStatement.setString(1, annot.get_Id().toString());
 				addAnnotContentStatement.setInt(2, ct.get_ElementSequenceNumber());
 				addAnnotContentStatement.setString(3, ct.get_ContentType());
@@ -746,8 +820,13 @@ public class ExportImpl extends BulkOperationThread {
 				addAnnotContentStatement.addBatch();
 				annotPathNode.setTextContent(file.getPath());
 				annotationNode.appendChild(annotPathNode);
-			}			
-			addAnnotContentStatement.executeBatch();
+			}
+			try {
+				addAnnotContentStatement.executeBatch();
+			} catch (BatchUpdateException e) {
+				log.error(String.format("%d,%s,%s,%s",FNExportStatus.INSERT_ANNOATION_ERROR,doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
+				updateDocumentExportStatus(doc, FNExportStatus.INSERT_ANNOATION_ERROR);
+			}
 			annotationsNode.appendChild(annotationNode);
 		}
 		addAnnotStatement.close();
@@ -784,5 +863,13 @@ public class ExportImpl extends BulkOperationThread {
 		return docId;
 	}
 	
+	private void updateDocumentExportStatus(Document doc, Integer exportStatusCOde) throws SQLException{
+		String updateString = "UPDATE DOCUMENT_DB.DOCUMENT SET EXPORT_STATUS=EXPORT_STATUS | ? WHERE OBJECT_ID=UUID_TO_BIN(?)";
+		PreparedStatement updateStatement = conn.prepareCall(updateString);
+		updateStatement.setInt(1, exportStatusCOde);
+		updateStatement.setString(2, doc.get_Id().toString());
+//		System.out.println(updateStatement.toString());
+		updateStatement.execute();
+	}
 }
 

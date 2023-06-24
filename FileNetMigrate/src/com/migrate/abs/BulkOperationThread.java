@@ -58,7 +58,7 @@ public abstract class BulkOperationThread implements Runnable {
 
 
 	
-	public BulkOperationThread(String batchBaseDir, Document doc, FNUtilLogger log, /*FileOutputStream ofs,*/ CPEUtil cpeUtil, HashMap<String, List<String>> classPropertiesMap, HashMap<String, String> propertyDefintion, String  mode) {
+	public BulkOperationThread(String batchBaseDir, Document doc, FNUtilLogger log,  CPEUtil cpeUtil, HashMap<String, List<String>> classPropertiesMap, HashMap<String, String> propertyDefintion, String  mode) {
 //		this.classNumToSymNameMap.put(1, "ICRIS_Pend_Doc");
 //		this.classNumToSymNameMap.put(2, "ICRIS_Reg_Doc");
 //		this.classNumToSymNameMap.put(3, "ICRIS_Tmplt_Doc");
@@ -72,6 +72,7 @@ public abstract class BulkOperationThread implements Runnable {
 		this.propertyDefintion = propertyDefintion;
 		this.mode = mode;
 		this.doc = doc;
+//		this.conn = conn;
 //		this.csvParser = new CSVParser();
 
 		try {
@@ -85,6 +86,7 @@ public abstract class BulkOperationThread implements Runnable {
 			
 			
 		} catch (FNUtilException e) {
+			e.printStackTrace();
 			if (e.exceptionCode.equals(FNUtilException.ExceptionCodeValue.CPE_USNAME_PASSWORD_INVALID)) {
 				log.error(e.getMessage());				
 			} else if (e.exceptionCode.equals(FNUtilException.ExceptionCodeValue.CPE_URI_INVALID)) {
@@ -104,17 +106,14 @@ public abstract class BulkOperationThread implements Runnable {
 	public void run() {
 		UserContext.get().pushSubject(cpeUtil.getSubject());
 		try {
-			this.conn = getMySQLConnection();
-			if (this.conn!=null) {
-//				if("ByFolder".equalsIgnoreCase(this.mode)|| "BySA".equalsIgnoreCase(this.mode)){
-//					this.processBatchItem(this.doc);
-//				} else {
-//					this.processBatchItem(this.dataLine);
-//				}
-				this.processBatchItem(this.doc);
-				this.conn.close();
+			if(conn==null) {
+				this.conn = getMySQLConnection();
 			}
+			this.processBatchItem(this.doc);
+			this.conn.close();
+
 		} catch(FNUtilException e) {
+			e.printStackTrace();
 			FolderSet folderSet = doc.get_FoldersFiledIn();
 			if(folderSet.isEmpty()) {
 				log.error(String.format("%s,%s,null", e.exceptionCode, doc.get_Id(), doc.get_Name()));
@@ -123,6 +122,7 @@ public abstract class BulkOperationThread implements Runnable {
 				log.error(String.format("%s,%s,%s", e.exceptionCode, doc.get_Id(), doc.get_Name(), folder.get_PathName()));
 			}
 		} catch (SQLException|IOException e) {
+			e.printStackTrace();
 			FolderSet folderSet = doc.get_FoldersFiledIn();
 			if(folderSet.isEmpty()) {
 				log.error(String.format("%s,%s,null", e.getMessage(), doc.get_Id(), doc.get_Name()));
@@ -136,26 +136,15 @@ public abstract class BulkOperationThread implements Runnable {
 	
 	private java.sql.Connection getMySQLConnection(){
 		java.sql.Connection result = null;
-//		while (result == null) {
-			try {
-				result = DriverManager.getConnection(this.JDBCURL, this.dbuser, this.dbpassword);
-				result.setAutoCommit(true);
-			}catch (SQLException e) {
-				e.printStackTrace();
-				System.exit(1);
-////				result = null;
-//				try {
-//					Thread.sleep(1000);
-//					e.printStackTrace();
-//				} catch (InterruptedException _e) {
-//					_e.printStackTrace();
-//				}
-			} 
-//		}
-			
-		return result;
-		
-		
+//		log.info("Create DB Connection");
+		try {
+			result = DriverManager.getConnection(this.JDBCURL, this.dbuser, this.dbpassword);
+			result.setAutoCommit(true);
+		}catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(1);
+		} 			
+		return result;		
 	}
 	
 	private void loadBatchSetConfig() throws FNUtilException {

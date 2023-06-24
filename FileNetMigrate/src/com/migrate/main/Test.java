@@ -10,7 +10,9 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import com.filenet.api.collection.DocumentSet;
 import com.filenet.api.collection.PageIterator;
+import com.filenet.api.collection.RepositoryRowSet;
 import com.filenet.api.core.*;
+import com.filenet.api.query.RepositoryRow;
 import com.filenet.api.query.SearchSQL;
 import com.filenet.api.query.SearchScope;
 import com.filenet.api.util.*;
@@ -30,31 +32,33 @@ public class Test {
 //		System.out.println("Connected");
 //		
 		FNUtilLogger log = new FNUtilLogger("C:\\temp");
-		CPEUtil cpeUtil = new CPEUtil("C:\\Users\\pcheung\\Documents\\iwms_batches\\batch_001\\batch.conf", log);
+		CPEUtil cpeUtil = new CPEUtil("D:\\iwms_batches\\batch_001\\batch.conf", log);
 		log.info("Connected to P8 Domain "+ cpeUtil.getDomain().get_Name());
 		
         SearchSQL sqlObject = new SearchSQL();
 //        sqlObject.setMaxRecords(100);       
 
-//        sqlObject.setWhereClause("StorageArea=Object('"+ getStorageAreaByName("").toString()+"')");
-        String select = "r.DocumentTitle, r.Name, r.FoldersFiledIn, r.DateLastModified, r.DateCreated, r.VersionSeries, r.SecurityPolicy, r.MajorVersionNumber, r.MinorVersionNumber, r.Id, r.StorageArea, r.ClassDescription, r.MimeType, r.ContentElements, r.Annotations";
+        sqlObject.setWhereClause("StorageArea='shelf201401'");
+        String select = "Id";
         sqlObject.setSelectList(select);
         String classAlias = "r";
         Boolean subClassToo = true;
-        sqlObject.setFromClauseInitialValue("IWMSDocument", classAlias, subClassToo);
+        sqlObject.setFromClauseInitialValue("IWMSDocument", null, subClassToo);
+        System.out.println(sqlObject.toString());
         SearchScope searchScope = new SearchScope(cpeUtil.getObjectStore());
-        System.out.println ("Start retrieving : " + new Date());
-        DocumentSet docSet = (DocumentSet)searchScope.fetchObjects(sqlObject,null,null ,Boolean.TRUE );
-;
-        PageIterator pageIter= docSet.pageIterator();
-        pageIter.setPageSize(1000);
+//        System.out.println ("Start retrieving : " + new Date());
+//        DocumentSet docSet = (DocumentSet)searchScope.fetchObjects(sqlObject,null,null ,Boolean.TRUE );
+        RepositoryRowSet rs = searchScope.fetchRows(sqlObject, null, null, true);
+//        RepositoryRow row = (RepositoryRow)rs.iterator().next();
+//        System.out.println(row.getProperties().getInteger32Value("Id"));
+        PageIterator pageIter= rs.pageIterator();
+        pageIter.setPageSize(10000);
         while (pageIter.nextPage()) {
     		System.out.println("Retrieving next " + pageIter.getElementCount() + " records  :" + new Date());
         	for (Object obj : pageIter.getCurrentPage()) {
-        		Document doc = (Document)obj;
-        		String sa = doc.get_StorageArea().get_DisplayName();
-        		if(!doc.get_Annotations().isEmpty())
-        			System.out.println(doc.get_Id().toString() + ";" + sa);
+        		RepositoryRow row = (RepositoryRow)obj;
+
+        			System.out.println(row.getProperties().getIdValue("Id").toString());
 
       		
         	}

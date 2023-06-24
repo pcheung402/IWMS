@@ -24,7 +24,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -47,6 +48,7 @@ import com.filenet.api.core.Document;
 import com.filenet.api.core.Factory;
 import com.fn.util.CPEUtil;
 import com.fn.util.CSVParser;
+import com.fn.util.FNExportStatus;
 import com.fn.util.FNUtilException;
 import com.fn.util.FNUtilLogger;
 import com.fn.util.CSVParser;
@@ -58,6 +60,7 @@ public class Launcher {
 //	static String batchSetId;
 	static String batchBaseDir, guidListFileName, className, mode=null;
 	static Integer threads = 10;
+	static Integer docCount = null;
 	static String folderPath="";
 	static String saName;
 	static FNUtilLogger log;
@@ -67,6 +70,10 @@ public class Launcher {
 	static Date batchStartTime, batchEndTime;
 	static  HashMap<String, String> propertyDefintion;
 	static HashMap<String, List<String>> classPropertiesMap;
+//	static String JDBCURL;
+//	static String dbuser;
+//	static String dbpassword;
+//	static java.sql.Connection conn=null;
 
 	public static void main(String[] args) 
 			throws 	
@@ -106,33 +113,36 @@ public class Launcher {
     			Document doc = Factory.Document.fetchInstance(cpeUtil.getObjectStore(), new Id(parsedLine[0]), null);
     			doc.fetchProperties(new String[] {"DocumentTitle", "Name", "FoldersFiledIn", "DateLastModified", 
     					"DateCreated", "VersionSeries", "SecurityPolicy", "MajorVersionNumber", 
-    					"MinorVersionNumber", "Id", "ClassDescription", "MimeType", /*"ContentElements",*/ "Annotations"});
-    			if (doc.get_ContentElements().iterator().hasNext()) {
-    			ContentTransfer ct = (ContentTransfer)doc.get_ContentElements().iterator().next();	    			
-	    			Constructor<?> cons = bulkOperationClass.getConstructor(new Class[]
-	    			{String.class,
-	    			Document.class,
-	    			FNUtilLogger.class,
-//	    			FileOutputStream.class,
-	    			CPEUtil.class,
-	    			HashMap.class,
-	    			HashMap.class,
-	    			String.class});	
-	    			executorPool.execute((Runnable) cons.newInstance(new Object[] {batchBaseDir, doc, log, /*bulkOperationOutputDataFile,*/  cpeUtil, classPropertiesMap, propertyDefintion, mode}));	
-    			} else {
-    				log.error(String.format("No Content File, %s, %s", doc.get_Id().toString(), doc.get_ClassDescription().get_SymbolicName()));
-    			}
+    					"MinorVersionNumber", "Id", "ClassDescription", "MimeType", /*"ContentElements",*/ "Annotations", "StorageArea"});
+    			Constructor<?> cons = bulkOperationClass.getConstructor(new Class[]
+    			{String.class,
+    			Document.class,
+    			FNUtilLogger.class,
+    			CPEUtil.class,
+    			HashMap.class,
+    			HashMap.class,
+    			String.class});	
+    			executorPool.execute((Runnable) cons.newInstance(new Object[] {batchBaseDir, doc, log, cpeUtil, classPropertiesMap, propertyDefintion, mode}));	
+//    			if (doc.get_ContentElements().iterator().hasNext()) {
+//    			ContentTransfer ct = (ContentTransfer)doc.get_ContentElements().iterator().next();	    			
+//
+//    			} else {
+//    				log.error(String.format("%d,%s,%s,%s",FNExportStatus.NO_CONTENT_FILE,doc.get_StorageArea().get_DisplayName(), "No Content FIle", doc.get_Id().toString()));
+////    				log.error(String.format("No Content File, %s, %s", doc.get_Id().toString(), doc.get_ClassDescription().get_SymbolicName()));
+//    			}
 			}
 		} else {
 		
         SearchSQL sqlObject = new SearchSQL();
-        sqlObject.setMaxRecords(10000);       
+        if (docCount!=null) {
+        	sqlObject.setMaxRecords(docCount);
+        }
         if("ByFolder".equalsIgnoreCase(mode)) {
         	sqlObject.setWhereClause("r.This INSUBFOLDER '" +folderPath + "'");
         } else if("BySA".equalsIgnoreCase(mode)) {
         	 sqlObject.setWhereClause("StorageArea=Object('"+ getStorageAreaByName(saName).toString()+"')");
         }         
-        String select = "r.DocumentTitle, r.Name, r.FoldersFiledIn, r.DateLastModified, r.DateCreated, r.VersionSeries, r.SecurityPolicy, r.MajorVersionNumber, r.MinorVersionNumber, r.Id, r.ClassDescription, r.MimeType, r.ContentElements, r.Annotations";
+        String select = "r.DocumentTitle, r.Name, r.FoldersFiledIn, r.DateLastModified, r.DateCreated, r.VersionSeries, r.SecurityPolicy, r.MajorVersionNumber, r.MinorVersionNumber, r.Id, r.ClassDescription, r.MimeType, r.ContentElements, r.Annotations, r.StorageArea";
 //        String select = "r.DocumentTitle, r.Name, r.FoldersFiledIn, r.DateLastModified, r.DateCreated, r.VersionSeries, r.SecurityPolicy, r.MajorVersionNumber, r.MinorVersionNumber, r.Id, r.ClassDescription, r.MimeType, r.Annotations";
 
         sqlObject.setSelectList(select);
@@ -140,13 +150,15 @@ public class Launcher {
         Boolean subClassToo = true;
         sqlObject.setFromClauseInitialValue(className, classAlias, subClassToo);
         SearchScope searchScope = new SearchScope(cpeUtil.getObjectStore());
-        System.out.println ("Start retrieving : " + new Date());
+//        System.out.println ("Start retrieving : " + new Date());
+        log.info("Start retrieving");
         DocumentSet docSet = (DocumentSet)searchScope.fetchObjects(sqlObject,null,null ,Boolean.TRUE );
 		log.info(String.format("start,%s",batchBaseDir));
         PageIterator pageIter= docSet.pageIterator();
         pageIter.setPageSize(1000);
         while (pageIter.nextPage()) {
-    		System.out.println("Retrieving next " + pageIter.getElementCount() + " records  :" + new Date());
+//    		System.out.println("Retrieving next " + pageIter.getElementCount() + " records  :" + new Date());
+        	log.info(String.format("Retrieving next %d records", pageIter.getElementCount()));
         	for (Object obj : pageIter.getCurrentPage()) {
         		Document doc = (Document)obj;
     			Date date = new Date();
@@ -154,21 +166,30 @@ public class Launcher {
     				isOverdue = true;
     				break;
     			}
-    			if (doc.get_ContentElements().iterator().hasNext()) {
-	    			ContentTransfer ct = (ContentTransfer)doc.get_ContentElements().iterator().next();
-	    			Constructor<?> cons = bulkOperationClass.getConstructor(new Class[]
-	    			{String.class,
-	    			Document.class,
-	    			FNUtilLogger.class,
-//	    			FileOutputStream.class,
-	    			CPEUtil.class,
-	    			HashMap.class,
-	    			HashMap.class,
-	    			String.class});	
-	    			executorPool.execute((Runnable) cons.newInstance(new Object[] {batchBaseDir, doc, log, /*bulkOperationOutputDataFile,*/  cpeUtil, classPropertiesMap, propertyDefintion, mode}));
-    			} else {
-    				log.error(String.format("No Content File, %s, %s", doc.get_Id().toString(), doc.get_ClassDescription().get_SymbolicName()));
-    			}
+    			Constructor<?> cons = bulkOperationClass.getConstructor(new Class[]
+    			{String.class,
+    			Document.class,
+    			FNUtilLogger.class,
+    			CPEUtil.class,
+    			HashMap.class,
+    			HashMap.class,
+    			String.class});	
+    			executorPool.execute((Runnable) cons.newInstance(new Object[] {batchBaseDir, doc, log, cpeUtil, classPropertiesMap, propertyDefintion, mode}));	
+//    			if (doc.get_ContentElements().iterator().hasNext()) {
+//	    			ContentTransfer ct = (ContentTransfer)doc.get_ContentElements().iterator().next();
+//	    			Constructor<?> cons = bulkOperationClass.getConstructor(new Class[]
+//	    			{String.class,
+//	    			Document.class,
+//	    			FNUtilLogger.class,
+//	    			CPEUtil.class,
+//	    			HashMap.class,
+//	    			HashMap.class,
+//	    			String.class});	
+//	    			executorPool.execute((Runnable) cons.newInstance(new Object[] {batchBaseDir, doc, log, cpeUtil, classPropertiesMap, propertyDefintion, mode}));
+//    			} else {
+//    				log.error(String.format("%d,%s,%s,%s",FNExportStatus.NO_CONTENT_FILE,doc.get_StorageArea().get_DisplayName(), "No Content FIle", doc.get_Id().toString()));
+////    				log.error(String.format("No Content File, %s, %s", doc.get_Id().toString(), doc.get_ClassDescription().get_SymbolicName()));
+//    			}
         	}
         }
 		}
@@ -239,6 +260,10 @@ public class Launcher {
         optionThreads.setRequired(false);
         options.addOption(optionThreads);
         
+        Option optionCount = new Option("n", "count", true, "max. no. of documents exported");
+        optionCount.setRequired(false);
+        options.addOption(optionCount);
+        
 
 
         CommandLineParser parser = new DefaultParser();
@@ -264,6 +289,9 @@ public class Launcher {
             
             if (cmd.hasOption("t")) 
             	threads = Integer.parseInt(cmd.getOptionValue("threads"));
+            
+            if (cmd.hasOption("n")) 
+            	docCount = Integer.parseInt(cmd.getOptionValue("count"));
 
         } catch (ParseException e) {
             System.out.println(e.getMessage());
@@ -286,6 +314,10 @@ public class Launcher {
 //			props.load(new FileInputStream("config/docdb.conf"));
 			batchStartTime = dateFormatter.parse(props.getProperty("batchStartTime"));
 			batchEndTime = dateFormatter.parse(props.getProperty("batchEndTime"));
+//			JDBCURL = "jdbc:mysql://"+ props.getProperty("DOCDBServer") + ":" + props.getProperty("DOCDBPort") + "/" + props.getProperty("DOCDBDatabase") + "?autoReconnect=true&failOverReadOnly=false";
+//			dbuser = props.getProperty("DOCDBUser");
+//			dbpassword = props.getProperty("DOCDBPassword");
+//			conn = getMySQLConnection();
 		} catch (ClassNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -375,4 +407,16 @@ public class Launcher {
 		
 		}
 	}
+	
+//	private static java.sql.Connection getMySQLConnection(){
+//		java.sql.Connection result = null;
+//		try {
+//			result = DriverManager.getConnection(JDBCURL, dbuser, dbpassword);
+//			result.setAutoCommit(true);
+//		}catch (SQLException e) {
+//			e.printStackTrace();
+//			System.exit(1);
+//		} 			
+//		return result;		
+//	}
 }

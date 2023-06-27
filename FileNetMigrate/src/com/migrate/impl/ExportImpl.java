@@ -498,7 +498,7 @@ public class ExportImpl extends BulkOperationThread {
 					propertyNode.appendChild(displayNameNode);
 					
 					Element typeNode = this.xmlDoc.createElement("Type");
-					typeNode.setTextContent("Id");
+					typeNode.setTextContent(dataType);
 					propertyNode.appendChild(typeNode);
 					
 					Element valueNode = this.xmlDoc.createElement("Value");

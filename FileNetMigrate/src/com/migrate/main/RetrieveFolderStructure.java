@@ -64,7 +64,7 @@ public class RetrieveFolderStructure {
         		String pathName = folder.get_PathName();
         		Folder parent = folder.get_Parent();
         		System.out.printf("%s\t%s\n",folderName, pathName);
-        		String queryString= "REPLACE INTO DOCUMENT_DB.FOLDER (OBJECT_ID,PARENT_OBJECT_ID,FOLDER_PATH) VALUES (UUID_TO_BIN(?),UUID_TO_BIN(?),?)";
+        		String queryString= "REPLACE INTO FOLDER (OBJECT_ID,PARENT_OBJECT_ID,FOLDER_PATH) VALUES (UUID_TO_BIN(?),UUID_TO_BIN(?),?)";
         		PreparedStatement insertStatement = conn.prepareCall(queryString);
         		insertStatement.setString(1, folder.get_Id().toString());
         		if(parent!=null) {

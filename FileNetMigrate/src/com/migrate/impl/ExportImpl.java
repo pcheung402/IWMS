@@ -83,9 +83,7 @@ public class ExportImpl extends BulkOperationThread {
 //	protected Boolean previewOnly;
 //	protected String dataLine;
 //	protected HashMap<String, List<String>> classPropertiesMap;
-//	protected HashMap<String, String> propertyDefintion;
-//	protected HashMap<Integer, String> classNumToSymNameMap = new HashMap<Integer, String>();
-//	protected HashMap<Integer, ArrayList<String>> classIndexMap = new HashMap<Integer, ArrayList<String>>();
+//	protected HashMap<String,  HashMap<String,String>> propertyDefintion;
 //	protected String[] isSystemProperties = {"F_ARCHIVEDATE","F_DELETEDATE","F_DOCCLASSNUMBER","F_DOCFORMAT","F_DOCLOCATION","F_DOCNUMBER","F_DOCTYPE","F_ENTRYDATE","F_PAGES","F_RETENTOFFSET"};
 //
 	
@@ -96,7 +94,7 @@ public class ExportImpl extends BulkOperationThread {
 	Element propertiesNode;
 	Element contentsNode;
 	String docSubDir;
-	public ExportImpl(String batchBaseDir, Document doc, FNUtilLogger log, CPEUtil cpeUtil, HashMap<String, List<String>> classPropertiesMap, HashMap<String, String> propertyDefintion, String mode) {
+	public ExportImpl(String batchBaseDir, Document doc, FNUtilLogger log, CPEUtil cpeUtil, HashMap<String, List<String>> classPropertiesMap, HashMap<String,  HashMap<String,String>> propertyDefintion, String mode) {
 		super(batchBaseDir, doc, log, cpeUtil,classPropertiesMap, propertyDefintion, mode);
 		// TODO Auto-generated constructor stub
 		this.docSubDir = this.batchBaseDir + File.separator + "documents" + File.separator + getDocSubDir(doc.get_Id().toString());
@@ -151,7 +149,7 @@ public class ExportImpl extends BulkOperationThread {
 	
 	private Boolean createDocument(Document doc) throws SQLException {
 //		System.out.println("1111111111111111");	
-		PreparedStatement deleteDocumentStatement = conn.prepareStatement("DELETE FROM DOCUMENT_DB.DOCUMENT WHERE OBJECT_ID=UUID_TO_BIN(?)");
+		PreparedStatement deleteDocumentStatement = conn.prepareStatement("DELETE FROM DOCUMENT WHERE OBJECT_ID=UUID_TO_BIN(?)");
 //		System.out.println("2222222222222222");	
 		deleteDocumentStatement.setString(1, doc.get_Id().toString());
 //		System.out.println(deleteDocumentStatement);	
@@ -173,7 +171,7 @@ public class ExportImpl extends BulkOperationThread {
 			String[] propertiesNameArray = classPropertiesMap.get(classSymbolicName).toArray(new String[0]);
 			
 			for (int i = 0; i < propertiesNameArray.length; ++i) {
-				String dataType = propertyDefintion.get(propertiesNameArray[i]);
+				String dataType = propertyDefintion.get(propertiesNameArray[i]).get("dataType");
 				if("StringList".equalsIgnoreCase(dataType)||
 						"DateList".equalsIgnoreCase(dataType)||
 						"IdList".equalsIgnoreCase(dataType)||
@@ -198,7 +196,8 @@ public class ExportImpl extends BulkOperationThread {
 		ArrayList<String>  singleValuedProperties = new ArrayList<String>();
 		ArrayList<String>  multiValuedProperties = new ArrayList<String>();
 		for (int i = 0; i < propertiesNameArray.length; ++i) {
-			String dataType = propertyDefintion.get(propertiesNameArray[i]);
+			String dataType = propertyDefintion.get(propertiesNameArray[i]).get("dataType");
+
 			if("String".equalsIgnoreCase(dataType)||
 					"DateTime".equalsIgnoreCase(dataType)||
 					"Id".equalsIgnoreCase(dataType)||
@@ -246,7 +245,7 @@ public class ExportImpl extends BulkOperationThread {
 					"STORAGE_AREA_NAME"
 			};
 
-			String queryString= "REPLACE INTO DOCUMENT_DB.DOCUMENT ("
+			String queryString= "REPLACE INTO DOCUMENT ("
 //					+ "OBJECT_ID,OBJECT_VSID,MAJOR_VER,MINOR_VER,DATE_CREATED,DATE_LAST_MODIFIED,SECURITY_POLICY,CLASS_SYMBOLIC_NAME,DOCUMENTTITLE,MIME_TYPE"
 					+ String.join(",", sysProperties)
 					+ "," 
@@ -458,133 +457,57 @@ public class ExportImpl extends BulkOperationThread {
 			Integer pos = sysProperties.length + 1;
 			for (String s: singleValuedProperties) {
 				Object docProperty= docProperties.getObjectValue(s);
-				String dataType = propertyDefintion.get(s);
+				String dataType = propertyDefintion.get(s).get("dataType");
+				String displayName = propertyDefintion.get(s).get("displayName");
+				String propertyValueStr=null;
 //				System.out.println("data type :" + s+":"+dataType);
-//				System.out.println(s);
 				if (docProperty == null) {
 					insertStatement.setObject(pos , null);
 				} else if ("Id".equalsIgnoreCase(dataType)) {
-					insertStatement.setString(pos, ((Id)docProperty).toString());
+					insertStatement.setString(pos,propertyValueStr);
+					propertyValueStr = ((Id)docProperty).toString();
+				} else if ("DateTime".equalsIgnoreCase(dataType)) {
+					Date dateValue = ((Date)docProperty);
+					propertyValueStr =dateValue.toString();
+					insertStatement.setDate(pos, new java.sql.Date(dateValue.getTime()));
+				} else if ("Integer".equalsIgnoreCase(dataType)) {
+					Integer intValue =  ((Integer)docProperty);
+					propertyValueStr = String.valueOf(intValue);
+					insertStatement.setInt(pos, intValue);
+				} else if ("Double".equalsIgnoreCase(dataType)) {
+					Double doubleValue = (Double)docProperty;
+					propertyValueStr = String.valueOf(doubleValue);
+					insertStatement.setDouble(pos, doubleValue);						
+				} else if ("Boolean".equalsIgnoreCase(dataType)) {						
+					Boolean boolValue = (Boolean)docProperty;
+					propertyValueStr = String.valueOf(boolValue);
+					insertStatement.setBoolean(pos, boolValue);
+				}  else if ("String".equalsIgnoreCase(dataType)) {						
+					propertyValueStr = (String)docProperty;
+					insertStatement.setString(pos, propertyValueStr);
+				}
 										
 					Element propertyNode = this.xmlDoc.createElement("Property");
+					
 					Element nameNode = this.xmlDoc.createElement("Name");
 					nameNode.setTextContent(s);
 					propertyNode.appendChild(nameNode);
+					
+					Element displayNameNode = this.xmlDoc.createElement("DisplayName");
+					displayNameNode.setTextContent(displayName);
+					propertyNode.appendChild(displayNameNode);
 					
 					Element typeNode = this.xmlDoc.createElement("Type");
 					typeNode.setTextContent("Id");
 					propertyNode.appendChild(typeNode);
 					
 					Element valueNode = this.xmlDoc.createElement("Value");
-					valueNode.setTextContent(((Id)docProperty).toString());
+					valueNode.setTextContent(propertyValueStr);
 					propertyNode.appendChild(valueNode);
 					
 					propertiesNode.appendChild(propertyNode);
-					
-				} else if ("DateTime".equalsIgnoreCase(dataType)) {
-					Date dateValue = ((Date)docProperty);
-					if(dateValue.after(new Date(0L))) {
-						insertStatement.setDate(pos, new java.sql.Date(dateValue.getTime()));
-																
-						Element propertyNode = this.xmlDoc.createElement("Property");
-						Element nameNode = this.xmlDoc.createElement("Name");
-						nameNode.setTextContent(s);
-						propertyNode.appendChild(nameNode);
-						
-						Element typeNode = this.xmlDoc.createElement("Type");
-						typeNode.setTextContent("DateTime");
-						propertyNode.appendChild(typeNode);
-						
-						Element valueNode = this.xmlDoc.createElement("Value");
-						valueNode.setTextContent(dateValue.toString());
-						propertyNode.appendChild(valueNode);
-						
-						propertiesNode.appendChild(propertyNode);
-
-					} else {
-						log.error(String.format("Incorrect datetime value, set to null : %s, %s, %s, %s", doc.get_Id().toString(), classSymbolicName, s ,(Date)docProperty).toString());
-						insertStatement.setDate(pos, null);
-					}
-				} else if ("Integer".equalsIgnoreCase(dataType)) {
-					Integer intValue =  ((Integer)docProperty);
-					insertStatement.setInt(pos, intValue);
-					
-					Element propertyNode = this.xmlDoc.createElement("Property");
-					Element nameNode = this.xmlDoc.createElement("Name");
-					nameNode.setTextContent(s);
-					propertyNode.appendChild(nameNode);
-					
-					Element typeNode = this.xmlDoc.createElement("Type");
-					typeNode.setTextContent("Integer");
-					propertyNode.appendChild(typeNode);
-					
-					Element valueNode = this.xmlDoc.createElement("Value");
-					valueNode.setTextContent(String.valueOf(intValue));
-					propertyNode.appendChild(valueNode);
-					
-					propertiesNode.appendChild(propertyNode);
-
-				} else if ("Double".equalsIgnoreCase(dataType)) {
-					Double doubleValue = (Double)docProperty;
-					insertStatement.setDouble(pos, doubleValue);
-					
-					Element propertyNode = this.xmlDoc.createElement("Property");
-					Element nameNode = this.xmlDoc.createElement("Name");
-					nameNode.setTextContent(s);
-					propertyNode.appendChild(nameNode);
-					
-					Element typeNode = this.xmlDoc.createElement("Type");
-					typeNode.setTextContent("Double");
-					propertyNode.appendChild(typeNode);
-					
-					Element valueNode = this.xmlDoc.createElement("Value");
-					valueNode.setTextContent(String.valueOf(doubleValue));
-					propertyNode.appendChild(valueNode);
-					
-					propertiesNode.appendChild(propertyNode);
-
-				} else if ("String".equalsIgnoreCase(dataType)) {
-					String strValue = (String)docProperty;
-					insertStatement.setString(pos, strValue);
-
-					
-					Element propertyNode = this.xmlDoc.createElement("Property");
-					Element nameNode = this.xmlDoc.createElement("Name");
-					nameNode.setTextContent(s);
-					propertyNode.appendChild(nameNode);
-					
-					Element typeNode = this.xmlDoc.createElement("Type");
-					typeNode.setTextContent("String");
-					propertyNode.appendChild(typeNode);
-					
-					Element valueNode = this.xmlDoc.createElement("Value");
-					valueNode.setTextContent(strValue);
-					propertyNode.appendChild(valueNode);
-					
-					propertiesNode.appendChild(propertyNode);
-
-				} else if ("Boolean".equalsIgnoreCase(dataType)) {
-					
-					Boolean boolValue = (Boolean)docProperty;
-					insertStatement.setBoolean(pos, boolValue);
-//					System.out.println("### " + s +"," + boolValue.toString());
-					Element propertyNode = this.xmlDoc.createElement("Property");
-					Element nameNode = this.xmlDoc.createElement("Name");
-					nameNode.setTextContent(s);
-					propertyNode.appendChild(nameNode);
-					
-					Element typeNode = this.xmlDoc.createElement("Type");
-					typeNode.setTextContent("Boolean");
-					propertyNode.appendChild(typeNode);
-					
-					Element valueNode = this.xmlDoc.createElement("Value");
-					valueNode.setTextContent(String.valueOf(boolValue));
-					propertyNode.appendChild(valueNode);
-					
-					propertiesNode.appendChild(propertyNode);
-					
-				}
-
+//					System.out.printf("%s, %s, %s, %s\n",s, displayName, dataType, propertyValueStr);
+				
 				pos++;
 			}
 
@@ -610,17 +533,22 @@ public class ExportImpl extends BulkOperationThread {
 //		deleteContentStatement.execute();
 		
 		
-		String insertString= "INSERT INTO DOCUMENT_DB.MULTI_VALUED_PROPERTY (OWNER_OBJECT_ID, SYMBOLIC_NAME, TYPE, VALUE) VALUES (UUID_TO_BIN(?), ?, ?, ?)";
+		String insertString= "INSERT INTO MULTI_VALUED_PROPERTY (OWNER_OBJECT_ID, SYMBOLIC_NAME, TYPE, VALUE) VALUES (UUID_TO_BIN(?), ?, ?, ?)";
 		PreparedStatement insertStatement = conn.prepareStatement(insertString);
 		
 		Properties properties = doc.getProperties();
 		String propertyClassName = properties.get(propertySymbolicName).getClass().getSimpleName();
+		String displayName = propertyDefintion.get(propertySymbolicName).get("displayName");
 		if("PropertyStringListImpl".equalsIgnoreCase(propertyClassName)) {
 
 			Element propertyNode = this.xmlDoc.createElement("Property");
 			Element nameNode = this.xmlDoc.createElement("Name");
 			nameNode.setTextContent(propertySymbolicName);
 			propertyNode.appendChild(nameNode);
+			
+			Element displayNameNode = this.xmlDoc.createElement("DisplayName");		
+			displayNameNode.setTextContent(displayName);
+			propertyNode.appendChild(displayNameNode);
 			
 			Element typeNode = this.xmlDoc.createElement("Type");
 			typeNode.setTextContent("String");
@@ -663,7 +591,7 @@ public class ExportImpl extends BulkOperationThread {
 //			deleteContentStatement.setString(1, doc.get_Id().toString());
 //			deleteContentStatement.execute();
 			
-			String queryString= "INSERT INTO DOCUMENT_DB.CONTENT (OBJECT_ID, DOCUMENT_OBJECT_ID, ESN, CONTENT_TYPE, RETRIEVAL_NAME, CONTENT) VALUES (UUID_TO_BIN(UUID()), UUID_TO_BIN(?), ?, ?, ? , ?)";
+			String queryString= "INSERT INTO CONTENT (OBJECT_ID, DOCUMENT_OBJECT_ID, ESN, CONTENT_TYPE, RETRIEVAL_NAME, CONTENT) VALUES (UUID_TO_BIN(UUID()), UUID_TO_BIN(?), ?, ?, ? , ?)";
 			PreparedStatement insertStatement = conn.prepareStatement(queryString);
 			
 			ContentElementList cel = doc.get_ContentElements();
@@ -709,7 +637,9 @@ public class ExportImpl extends BulkOperationThread {
 						updateDocumentExportStatus(doc, FNExportStatus.EXPORT_CONTENT_ERROR);
 					}
 					else 
-						throw e;
+						log.error(String.format("%d,%s,%s,%s",FNExportStatus.OTHER_ERROR,doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
+						updateDocumentExportStatus(doc, FNExportStatus.OTHER_ERROR);
+
 				} catch (IOException e) {
 					log.error(String.format("%d,%s,%s,%s",FNExportStatus.EXPORT_CONTENT_ERROR,doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
 						updateDocumentExportStatus(doc, FNExportStatus.EXPORT_CONTENT_ERROR);
@@ -741,7 +671,7 @@ public class ExportImpl extends BulkOperationThread {
 //		deleteAnnotStatement.close();
 		
 		
-		PreparedStatement addAnnotStatement = conn.prepareStatement("INSERT INTO DOCUMENT_DB.ANNOTATION (OBJECT_ID,ANNOTATED_OBJECT_ID,ANNOTATED_CONTENT_ELEMENT, DATE_CREATED, DATE_LAST_MODIFIED) VALUES (UUID_TO_BIN(?),UUID_TO_BIN(?),?,?,?)");		
+		PreparedStatement addAnnotStatement = conn.prepareStatement("INSERT INTO ANNOTATION (OBJECT_ID,ANNOTATED_OBJECT_ID,ANNOTATED_CONTENT_ELEMENT, DATE_CREATED, DATE_LAST_MODIFIED) VALUES (UUID_TO_BIN(?),UUID_TO_BIN(?),?,?,?)");		
 		AnnotationSet annotSet =  doc.get_Annotations();
 		
 		Iterator<Annotation> annotIt = annotSet.iterator();
@@ -834,13 +764,13 @@ public class ExportImpl extends BulkOperationThread {
 	}
 	private void addContainer(Document doc) throws SQLException {
 		Element foldersNode = this.xmlDoc.createElement("Folders");
-//		PreparedStatement deleteFolderStatement = conn.prepareStatement("DELETE FROM DOCUMENT_DB.CONTAINER WHERE CONTAINEE_OBJECT_ID=UUID_TO_BIN(?)");
+//		PreparedStatement deleteFolderStatement = conn.prepareStatement("DELETE FROM CONTAINER WHERE CONTAINEE_OBJECT_ID=UUID_TO_BIN(?)");
 //		deleteFolderStatement.setString(1, doc.get_Id().toString());
 //		deleteFolderStatement.execute();
 //		deleteFolderStatement.close();
 		
 		
-		PreparedStatement addFolderStatement = conn.prepareStatement("INSERT INTO DOCUMENT_DB.CONTAINER (OBJECT_ID,CONTAINEE_OBJECT_ID) VALUES (UUID_TO_BIN(?),UUID_TO_BIN(?))");		
+		PreparedStatement addFolderStatement = conn.prepareStatement("INSERT INTO CONTAINER (OBJECT_ID,CONTAINEE_OBJECT_ID) VALUES (UUID_TO_BIN(?),UUID_TO_BIN(?))");		
 		doc.fetchProperties(new String[] {"FoldersFiledIn"});
 		FolderSet folderSet =  doc.get_FoldersFiledIn();
 		Iterator<Folder> folderIt = folderSet.iterator();
@@ -864,7 +794,7 @@ public class ExportImpl extends BulkOperationThread {
 	}
 	
 	private void updateDocumentExportStatus(Document doc, Integer exportStatusCOde) throws SQLException{
-		String updateString = "UPDATE DOCUMENT_DB.DOCUMENT SET EXPORT_STATUS=EXPORT_STATUS | ? WHERE OBJECT_ID=UUID_TO_BIN(?)";
+		String updateString = "UPDATE DOCUMENT SET EXPORT_STATUS=EXPORT_STATUS | ? WHERE OBJECT_ID=UUID_TO_BIN(?)";
 		PreparedStatement updateStatement = conn.prepareCall(updateString);
 		updateStatement.setInt(1, exportStatusCOde);
 		updateStatement.setString(2, doc.get_Id().toString());

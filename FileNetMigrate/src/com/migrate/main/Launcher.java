@@ -68,7 +68,8 @@ public class Launcher {
 //	static FileOutputStream bulkOperationOutputDataFile;
 	static Class<?> bulkOperationClass;
 	static Date batchStartTime, batchEndTime;
-	static  HashMap<String, String> propertyDefintion;
+//	static HashMap<String, String> propertyDefintion;
+	static HashMap<String, HashMap<String,String>> propertyDefintion;
 	static HashMap<String, List<String>> classPropertiesMap;
 //	static String JDBCURL;
 //	static String dbuser;
@@ -137,6 +138,7 @@ public class Launcher {
         if (docCount!=null) {
         	sqlObject.setMaxRecords(docCount);
         }
+        sqlObject.setOrderByClause("DateLastModified ASC");
         if("ByFolder".equalsIgnoreCase(mode)) {
         	sqlObject.setWhereClause("r.This INSUBFOLDER '" +folderPath + "'");
         } else if("BySA".equalsIgnoreCase(mode)) {
@@ -346,6 +348,7 @@ public class Launcher {
 		
 		initClassPropertiesMap();
 		initPropertyDefinition();
+
 	}
 	
 	private static void initClassPropertiesMap() throws ParserConfigurationException, SAXException, IOException {
@@ -364,6 +367,7 @@ public class Launcher {
 				Element eElement = (Element) nNode;
 				NodeList propNodeList = eElement.getElementsByTagName("property");
 				ArrayList<String> propSymbolicNames = new ArrayList<String>();
+				
 //				System.out.println("#### "+eElement.getElementsByTagName("symName").item(0).getTextContent()+" #####");
 				for (int i = 0; i < propNodeList.getLength(); ++i) {
 					Node propNode = propNodeList.item(i);
@@ -373,6 +377,7 @@ public class Launcher {
 //						System.out.println(propElement.getTextContent());
 					}							
 				}
+//				System.out.println("***"+eElement.getElementsByTagName("symName").item(0).getTextContent());
 				classPropertiesMap.put(eElement.getElementsByTagName("symName").item(0).getTextContent(), propSymbolicNames);
 			}				
 			
@@ -380,7 +385,8 @@ public class Launcher {
 	}
 	
 	private static void initPropertyDefinition() throws ParserConfigurationException, SAXException, IOException {
-		propertyDefintion = new HashMap<String, String>();		
+//		propertyDefintion = new HashMap<String, String>();
+		propertyDefintion = new HashMap<String, HashMap<String,String>>();
 //		File fXmlFile = new File((new Launcher()).getClass().getClassLoader().getResource("propertiesDefinitions.xml").getPath());
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -392,7 +398,11 @@ public class Launcher {
 			
 			if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 				Element eElement = (Element) nNode;
-				propertyDefintion.put(eElement.getElementsByTagName("symName").item(0).getTextContent(), eElement.getElementsByTagName("dataType").item(0).getTextContent());
+				HashMap propertyAttrMap = new HashMap<String,String>();
+				propertyAttrMap.put("dataType",eElement.getElementsByTagName("dataType").item(0).getTextContent());
+				propertyAttrMap.put("displayName", eElement.getElementsByTagName("description").item(0).getTextContent());
+//				propertyDefintion.put(eElement.getElementsByTagName("symName").item(0).getTextContent(), eElement.getElementsByTagName("dataType").item(0).getTextContent());
+				propertyDefintion.put(eElement.getElementsByTagName("symName").item(0).getTextContent(), propertyAttrMap);
 //				System.out.println(eElement.getElementsByTagName("symName").item(0).getTextContent() + " / " + eElement.getElementsByTagName("dataType").item(0).getTextContent());
 			}
 		}

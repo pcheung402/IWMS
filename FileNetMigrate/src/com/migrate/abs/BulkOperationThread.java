@@ -51,14 +51,13 @@ public abstract class BulkOperationThread implements Runnable {
 	protected String dataLine;
 	protected Document doc;
 	protected HashMap<String, List<String>> classPropertiesMap;
-	protected HashMap<String, String> propertyDefintion;
-//	protected HashMap<Integer, String> classNumToSymNameMap = new HashMap<Integer, String>();
-//	protected HashMap<Integer, ArrayList<String>> classIndexMap = new HashMap<Integer, ArrayList<String>>();
+//	protected HashMap<String, String> propertyDefintion;
+	protected HashMap<String, HashMap<String,String>> propertyDefintion;
 	protected String[] isSystemProperties = {"F_ARCHIVEDATE","F_DELETEDATE","F_DOCCLASSNUMBER","F_DOCFORMAT","F_DOCLOCATION","F_DOCNUMBER","F_DOCTYPE","F_ENTRYDATE","F_PAGES","F_RETENTOFFSET"};
 
 
 	
-	public BulkOperationThread(String batchBaseDir, Document doc, FNUtilLogger log,  CPEUtil cpeUtil, HashMap<String, List<String>> classPropertiesMap, HashMap<String, String> propertyDefintion, String  mode) {
+	public BulkOperationThread(String batchBaseDir, Document doc, FNUtilLogger log,  CPEUtil cpeUtil, HashMap<String, List<String>> classPropertiesMap, HashMap<String, HashMap<String,String>> propertyDefintion, String  mode) {
 //		this.classNumToSymNameMap.put(1, "ICRIS_Pend_Doc");
 //		this.classNumToSymNameMap.put(2, "ICRIS_Reg_Doc");
 //		this.classNumToSymNameMap.put(3, "ICRIS_Tmplt_Doc");

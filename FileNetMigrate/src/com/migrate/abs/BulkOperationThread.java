@@ -124,7 +124,7 @@ public abstract class BulkOperationThread implements Runnable {
 			e.printStackTrace();
 			FolderSet folderSet = doc.get_FoldersFiledIn();
 			if(folderSet.isEmpty()) {
-				log.error(String.format("%s,%s,null", e.getMessage(), doc.get_Id(), doc.get_Name()));
+				log.error(String.format("%s,%s,%s", e.getMessage(), doc.get_Id(), doc.get_Name()));
 			} else {
 				Folder folder = (Folder)folderSet.iterator().next();
 				folder.fetchProperties(new String[] {"PathName"});

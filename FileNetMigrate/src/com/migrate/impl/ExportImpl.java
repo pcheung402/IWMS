@@ -633,30 +633,35 @@ public class ExportImpl extends BulkOperationThread {
 					insertStatement.addBatch();	
 				} catch (EngineRuntimeException e) {
 					if(e.getExceptionCode()==ExceptionCode.CONTENT_FCA_FILE_DOES_NOT_EXIST) {
-						log.error(String.format("%d,%s,%s,%s",FNExportStatus.EXPORT_CONTENT_ERROR,doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
-						updateDocumentExportStatus(doc, FNExportStatus.EXPORT_CONTENT_ERROR);
+						logExportError(doc, FNExportStatus.EXPORT_CONTENT_ERROR, e.getMessage());
+//						log.error(String.format("%d,%s,%s,%s",FNExportStatus.EXPORT_CONTENT_ERROR,doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
+//						updateDocumentExportStatus(doc, FNExportStatus.EXPORT_CONTENT_ERROR);
 					}
-					else 
-						log.error(String.format("%d,%s,%s,%s",FNExportStatus.OTHER_ERROR,doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
-						updateDocumentExportStatus(doc, FNExportStatus.OTHER_ERROR);
+					else
+						logExportError(doc, FNExportStatus.OTHER_ERROR, e.getMessage());
+//						log.error(String.format("%d,%s,%s,%s",FNExportStatus.OTHER_ERROR,doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
+//						updateDocumentExportStatus(doc, FNExportStatus.OTHER_ERROR);
 
 				} catch (IOException e) {
-					log.error(String.format("%d,%s,%s,%s",FNExportStatus.EXPORT_CONTENT_ERROR,doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
-						updateDocumentExportStatus(doc, FNExportStatus.EXPORT_CONTENT_ERROR);
+					logExportError(doc, FNExportStatus.EXPORT_CONTENT_ERROR, e.getMessage());
+//					log.error(String.format("%d,%s,%s,%s",FNExportStatus.EXPORT_CONTENT_ERROR,doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
+//						updateDocumentExportStatus(doc, FNExportStatus.EXPORT_CONTENT_ERROR);
 				}
 			
 			}
 			try {
 				insertStatement.executeBatch();
 			} catch (BatchUpdateException e) {
-				log.error(String.format("%d,%s,%s,%s",FNExportStatus.INSERT_CONTENT_ERROR, doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
-				updateDocumentExportStatus(doc, FNExportStatus.INSERT_CONTENT_ERROR);
+				logExportError(doc, FNExportStatus.INSERT_CONTENT_ERROR, e.getMessage());
+//				log.error(String.format("%d,%s,%s,%s",FNExportStatus.INSERT_CONTENT_ERROR, doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
+//				updateDocumentExportStatus(doc, FNExportStatus.INSERT_CONTENT_ERROR);
 			}			
 			insertStatement.close();
 			this.docNode.appendChild(contentsNode);			
 		} else {
-			log.error(String.format("%d,%s,%s,%s",FNExportStatus.NO_CONTENT_FILE,doc.get_StorageArea().get_DisplayName(), "No Content FIle", doc.get_Id().toString()));
-			updateDocumentExportStatus(doc, FNExportStatus.NO_CONTENT_FILE);
+			logExportError(doc, FNExportStatus.NO_CONTENT_FILE, "No Content File" );
+//			log.error(String.format("%d,%s,%s,%s",FNExportStatus.NO_CONTENT_FILE,doc.get_StorageArea().get_DisplayName(), "No Content FIle", doc.get_Id().toString()));
+//			updateDocumentExportStatus(doc, FNExportStatus.NO_CONTENT_FILE);
 //			log.error(String.format("No Content File, %s, %s", doc.get_Id().toString(), doc.get_ClassDescription().get_SymbolicName()));
 		}
 
@@ -733,12 +738,14 @@ public class ExportImpl extends BulkOperationThread {
 		            is.close();
 				} catch (EngineRuntimeException e) {
 					if(e.getExceptionCode()==ExceptionCode.CONTENT_FCA_FILE_DOES_NOT_EXIST)
-						log.error(String.format("%d,%s,%s,%s",FNExportStatus.EXPORT_ANNOTATION_ERROR, doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
-						updateDocumentExportStatus(doc, FNExportStatus.EXPORT_ANNOTATION_ERROR);
+						logExportError(doc, FNExportStatus.EXPORT_ANNOTATION_ERROR, e.getMessage());
+//						log.error(String.format("%d,%s,%s,%s",FNExportStatus.EXPORT_ANNOTATION_ERROR, doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
+//						updateDocumentExportStatus(doc, FNExportStatus.EXPORT_ANNOTATION_ERROR);
 						
 				} catch (IOException e) {
-					log.error(String.format("%d,%s,%s,%s",FNExportStatus.EXPORT_ANNOTATION_ERROR, doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
-					updateDocumentExportStatus(doc, FNExportStatus.EXPORT_ANNOTATION_ERROR);
+					logExportError(doc, FNExportStatus.EXPORT_ANNOTATION_ERROR, e.getMessage());
+//					log.error(String.format("%d,%s,%s,%s",FNExportStatus.EXPORT_ANNOTATION_ERROR, doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
+//					updateDocumentExportStatus(doc, FNExportStatus.EXPORT_ANNOTATION_ERROR);
 				}
 
 
@@ -754,8 +761,9 @@ public class ExportImpl extends BulkOperationThread {
 			try {
 				addAnnotContentStatement.executeBatch();
 			} catch (BatchUpdateException e) {
-				log.error(String.format("%d,%s,%s,%s",FNExportStatus.INSERT_ANNOATION_ERROR,doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
-				updateDocumentExportStatus(doc, FNExportStatus.INSERT_ANNOATION_ERROR);
+				logExportError(doc, FNExportStatus.INSERT_ANNOATION_ERROR, e.getMessage());
+//				log.error(String.format("%d,%s,%s,%s",FNExportStatus.INSERT_ANNOATION_ERROR,doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
+//				updateDocumentExportStatus(doc, FNExportStatus.INSERT_ANNOATION_ERROR);
 			}
 			annotationsNode.appendChild(annotationNode);
 		}
@@ -800,6 +808,12 @@ public class ExportImpl extends BulkOperationThread {
 		updateStatement.setString(2, doc.get_Id().toString());
 //		System.out.println(updateStatement.toString());
 		updateStatement.execute();
+	}
+	
+	private void logExportError(Document doc, Integer errorCode, String errorMeesage) throws SQLException {
+		log.error(String.format("%d,%s,%s,%s",doc.get_Id().toString(), FNExportStatus.EXPORT_CONTENT_ERROR,doc.get_StorageArea().get_DisplayName(), errorMeesage));
+		updateDocumentExportStatus(doc, FNExportStatus.EXPORT_CONTENT_ERROR);
+		
 	}
 }
 

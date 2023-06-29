@@ -269,6 +269,10 @@ public class ExportImpl extends BulkOperationThread {
 			idNameNode.setTextContent("Id");
 			idPropertyNode.appendChild(idNameNode);
 			
+			Element idDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+			idDisplayNameNode.setTextContent("Object ID");
+			idPropertyNode.appendChild(idDisplayNameNode);
+			
 			Element idTypeNode = this.xmlDoc.createElement("Type");
 			idTypeNode.setTextContent("Id");
 			idPropertyNode.appendChild(idTypeNode);
@@ -285,6 +289,10 @@ public class ExportImpl extends BulkOperationThread {
 			Element vsIdNameNode = this.xmlDoc.createElement("Name");
 			vsIdNameNode.setTextContent("vsId");
 			vsIdPropertyNode.appendChild(vsIdNameNode);
+
+			Element vsIdDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+			vsIdDisplayNameNode.setTextContent("Version Series ID");
+			vsIdPropertyNode.appendChild(vsIdDisplayNameNode);			
 			
 			Element vsIdTypeNode = this.xmlDoc.createElement("Type");
 			vsIdTypeNode.setTextContent("Id");
@@ -303,6 +311,10 @@ public class ExportImpl extends BulkOperationThread {
 			majorVerNameNode.setTextContent("Major_Version");
 			majorVerPropertyNode.appendChild(majorVerNameNode);
 			
+			Element majorVerDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+			majorVerDisplayNameNode.setTextContent("Major Version");
+			majorVerPropertyNode.appendChild(majorVerDisplayNameNode);
+			
 			Element majorVerTypeNode = this.xmlDoc.createElement("Type");
 			majorVerTypeNode.setTextContent("Integer");
 			majorVerPropertyNode.appendChild(majorVerTypeNode);
@@ -319,6 +331,10 @@ public class ExportImpl extends BulkOperationThread {
 			Element minorVerNameNode = this.xmlDoc.createElement("Name");
 			minorVerNameNode.setTextContent("Minor_Version");
 			minorVerPropertyNode.appendChild(minorVerNameNode);
+			
+			Element minorVerDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+			minorVerDisplayNameNode.setTextContent("Minor Version");
+			minorVerPropertyNode.appendChild(minorVerDisplayNameNode);			
 			
 			Element minorVerTypeNode = this.xmlDoc.createElement("Type");
 			minorVerTypeNode.setTextContent("Integer");
@@ -337,6 +353,10 @@ public class ExportImpl extends BulkOperationThread {
 				Element dateCreatedNameNode = this.xmlDoc.createElement("Name");
 				dateCreatedNameNode.setTextContent("Date_Created");
 				dateCreatedPropertyNode.appendChild(dateCreatedNameNode);
+				
+				Element dateCreatedDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+				dateCreatedDisplayNameNode.setTextContent("Date Created");
+				dateCreatedPropertyNode.appendChild(dateCreatedDisplayNameNode);			
 				
 				Element dateCreatedTypeNode = this.xmlDoc.createElement("Type");
 				dateCreatedTypeNode.setTextContent("DateTime");
@@ -360,6 +380,10 @@ public class ExportImpl extends BulkOperationThread {
 				dateLastModifiedNameNode.setTextContent("Date_Last_Modified");
 				dateLastModifiedPropertyNode.appendChild(dateLastModifiedNameNode);
 				
+				Element dateLastModifiedDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+				dateLastModifiedDisplayNameNode.setTextContent("Date Last Modified");
+				dateLastModifiedPropertyNode.appendChild(dateLastModifiedDisplayNameNode);	
+				
 				Element dateLastModifiedTypeNode = this.xmlDoc.createElement("Type");
 				dateLastModifiedTypeNode.setTextContent("DateTime");
 				dateLastModifiedPropertyNode.appendChild(dateLastModifiedTypeNode);
@@ -382,6 +406,10 @@ public class ExportImpl extends BulkOperationThread {
 			symNameNode.setTextContent("Class_Symbolic_Name");
 			symNamePropertyNode.appendChild(symNameNode);
 			
+			Element symNameDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+			symNameDisplayNameNode.setTextContent("Class Name");
+			symNamePropertyNode.appendChild(symNameDisplayNameNode);
+			
 			Element symNameTypeNode = this.xmlDoc.createElement("Type");
 			symNameTypeNode.setTextContent("String");
 			symNamePropertyNode.appendChild(symNameTypeNode);
@@ -400,6 +428,10 @@ public class ExportImpl extends BulkOperationThread {
 			docTitleNode.setTextContent("Document_Title");
 			docTitlePropertyNode.appendChild(docTitleNode);
 			
+			Element docTitleDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+			docTitleDisplayNameNode.setTextContent("Document Title");
+			docTitlePropertyNode.appendChild(docTitleDisplayNameNode);
+			
 			Element docTitleTypeNode = this.xmlDoc.createElement("Type");
 			docTitleTypeNode.setTextContent("String");
 			docTitlePropertyNode.appendChild(docTitleTypeNode);
@@ -417,6 +449,10 @@ public class ExportImpl extends BulkOperationThread {
 			Element mimeNode = this.xmlDoc.createElement("Name");
 			mimeNode.setTextContent("MIME_Type");
 			mimePropertyNode.appendChild(mimeNode);
+			
+			Element mimeDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+			mimeDisplayNameNode.setTextContent("MIME Type");
+			mimePropertyNode.appendChild(mimeDisplayNameNode);
 			
 			Element mimeTypeNode = this.xmlDoc.createElement("Type");
 			mimeTypeNode.setTextContent("String");
@@ -437,6 +473,10 @@ public class ExportImpl extends BulkOperationThread {
 			Element storageAreaNode = this.xmlDoc.createElement("Name");
 			storageAreaNode.setTextContent("STORAGE_AREA");
 			storageAreaPropertyNode.appendChild(storageAreaNode);
+			
+			Element storageAreaDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+			storageAreaDisplayNameNode.setTextContent("Storage Area");
+			storageAreaPropertyNode.appendChild(storageAreaDisplayNameNode);
 			
 			Element storageAreaTypeNode = this.xmlDoc.createElement("Type");
 			storageAreaTypeNode.setTextContent("String");

@@ -97,7 +97,7 @@ public class ExportImpl extends BulkOperationThread {
 	public ExportImpl(String batchBaseDir, Document doc, FNUtilLogger log, CPEUtil cpeUtil, HashMap<String, List<String>> classPropertiesMap, HashMap<String,  HashMap<String,String>> propertyDefintion, String mode) {
 		super(batchBaseDir, doc, log, cpeUtil,classPropertiesMap, propertyDefintion, mode);
 		// TODO Auto-generated constructor stub
-		this.docSubDir = this.batchBaseDir + File.separator + "documents" + File.separator + getDocSubDir(doc.get_Id().toString());
+		this.docSubDir = this.batchBaseDir + File.separator + "documents" + File.separator + getDocSubDir(doc);
 		
 	}
 	

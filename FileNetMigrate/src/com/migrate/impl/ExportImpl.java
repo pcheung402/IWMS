@@ -92,12 +92,6 @@ public class ExportImpl extends BulkOperationThread {
 //	protected String[] isSystemProperties = {"F_ARCHIVEDATE","F_DELETEDATE","F_DOCCLASSNUMBER","F_DOCFORMAT","F_DOCLOCATION","F_DOCNUMBER","F_DOCTYPE","F_ENTRYDATE","F_PAGES","F_RETENTOFFSET"};
 //
 	
-//	private DocumentBuilderFactory factory;
-//	private DocumentBuilder builder;
-//	private org.w3c.dom.Document xmlDoc;
-//	private Element docNode;
-//	private Element propertiesNode;
-//	private Element contentsNode;
 	private String docSubDir;
 	private DocumentXML documentXML;
 	
@@ -112,16 +106,6 @@ public class ExportImpl extends BulkOperationThread {
 
 	public void processBatchItem(Document doc) throws FNUtilException, IOException, SQLException {
 		documentXML = new DocumentXML();
-//		try {
-////			this.factory = DocumentBuilderFactory.newInstance();
-////			this.builder = factory.newDocumentBuilder();
-////			this.xmlDoc = builder.newDocument();
-////			this.docNode = this.xmlDoc.createElement("Document");
-//			
-//		} catch (ParserConfigurationException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 		ClassDescription cd = doc.get_ClassDescription();
 		String classSymbolicName = cd.get_SymbolicName();
 		String classDisplayName = cd.get_DisplayName();
@@ -131,20 +115,7 @@ public class ExportImpl extends BulkOperationThread {
 			addContent(doc);
 			addAnnotation(doc);
 			addContainer(doc);
-//			bulkOperationOutputDataFile.write(String.format("%s,%s,%s\n",doc.get_Name(), doc.get_Id().toString(), classSymbolicName).getBytes());
-//			bulkOperationOutputDataFile.flush();	       
-//			this.xmlDoc.appendChild(docNode);
-			try {
-//				TransformerFactory transformerFactory = TransformerFactory.newInstance();
-//				Transformer transformer = transformerFactory.newTransformer();
-//		        DOMSource source = new DOMSource(this.xmlDoc);
-////		        String xmlFilePath = "." + File.separator + "data" + File.separator + "bulkOutput" + File.separator + doc.get_Id().toString() +".xml";
-////		        String xmlFilePath = this.batchBaseDir + File.separator + "documents" + File.separator + doc.get_Id().toString();
-//		        Files.createDirectories(Paths.get(this.docSubDir));
-//		        FileOutputStream output = new FileOutputStream(docSubDir + File.separator + "properties.xml");
-//		        StreamResult result = new StreamResult(output);
-//		        transformer.transform(source, result);
-				
+			try {				
 		          JAXBContext jaxbContext = JAXBContext.newInstance(DocumentXML.class);
 		          Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
 		 
@@ -166,15 +137,11 @@ public class ExportImpl extends BulkOperationThread {
 	
 	
 	private Boolean createDocument(Document doc) throws SQLException {
-//		System.out.println("1111111111111111");	
+
 		PreparedStatement deleteDocumentStatement = conn.prepareStatement("DELETE FROM DOCUMENT WHERE OBJECT_ID=UUID_TO_BIN(?)");
-//		System.out.println("2222222222222222");	
 		deleteDocumentStatement.setString(1, doc.get_Id().toString());
-//		System.out.println(deleteDocumentStatement);	
 		deleteDocumentStatement.execute();
-//		System.out.println("3333333333333333");	
 		Boolean result = Boolean.FALSE;
-//		propertiesNode = this.xmlDoc.createElement("Properties");
 		ClassDescription cd = doc.get_ClassDescription();
 		String classSymbolicName = cd.get_SymbolicName();
 		
@@ -282,114 +249,22 @@ public class ExportImpl extends BulkOperationThread {
 			
 			insertStatement.setString(1, doc.get_Id().toString());
 			documentXML.addProperty("Id", "Object Id", "Id", doc.get_Id().toString());
-			
-//			Element idPropertyNode = this.xmlDoc.createElement("Property");
-//			Element idNameNode = this.xmlDoc.createElement("Name");
-//			idNameNode.setTextContent("Id");
-//			idPropertyNode.appendChild(idNameNode);
-//			
-//			Element idDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-//			idDisplayNameNode.setTextContent("Object ID");
-//			idPropertyNode.appendChild(idDisplayNameNode);
-//			
-//			Element idTypeNode = this.xmlDoc.createElement("Type");
-//			idTypeNode.setTextContent("Id");
-//			idPropertyNode.appendChild(idTypeNode);
-//			
-//			Element idValueNode = this.xmlDoc.createElement("Value");
-//			idValueNode.setTextContent(doc.get_Id().toString());
-//			idPropertyNode.appendChild(idValueNode);
-//			
-//			propertiesNode.appendChild(idPropertyNode);
-			
+						
 			insertStatement.setString(2, vsId.toString());
 			documentXML.addProperty("Name", "vsId", "Id", doc.get_VersionSeries().get_Id().toString());
-			
-//			Element vsIdPropertyNode = this.xmlDoc.createElement("Property");
-//			Element vsIdNameNode = this.xmlDoc.createElement("Name");
-//			vsIdNameNode.setTextContent("vsId");
-//			vsIdPropertyNode.appendChild(vsIdNameNode);
-//
-//			Element vsIdDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-//			vsIdDisplayNameNode.setTextContent("Version Series ID");
-//			vsIdPropertyNode.appendChild(vsIdDisplayNameNode);			
-//			
-//			Element vsIdTypeNode = this.xmlDoc.createElement("Type");
-//			vsIdTypeNode.setTextContent("Id");
-//			vsIdPropertyNode.appendChild(vsIdTypeNode);
-//			
-//			Element vsIdValueNode = this.xmlDoc.createElement("Value");
-//			vsIdValueNode.setTextContent(doc.get_VersionSeries().get_Id().toString());
-//			vsIdPropertyNode.appendChild(vsIdValueNode);
-//			
-//			propertiesNode.appendChild(vsIdPropertyNode);
-			
+						
 			insertStatement.setInt(3, doc.get_MajorVersionNumber());
 			documentXML.addProperty("Major_Version", "Major Version", "Integer", String.valueOf(doc.get_MajorVersionNumber()));
-			
-//			Element majorVerPropertyNode = this.xmlDoc.createElement("Property");
-//			Element majorVerNameNode = this.xmlDoc.createElement("Name");
-//			majorVerNameNode.setTextContent("Major_Version");
-//			majorVerPropertyNode.appendChild(majorVerNameNode);
-//			
-//			Element majorVerDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-//			majorVerDisplayNameNode.setTextContent("Major Version");
-//			majorVerPropertyNode.appendChild(majorVerDisplayNameNode);
-//			
-//			Element majorVerTypeNode = this.xmlDoc.createElement("Type");
-//			majorVerTypeNode.setTextContent("Integer");
-//			majorVerPropertyNode.appendChild(majorVerTypeNode);
-//			
-//			Element majorVerValueNode = this.xmlDoc.createElement("Value");
-//			majorVerValueNode.setTextContent(String.valueOf(doc.get_MajorVersionNumber()));
-//			majorVerPropertyNode.appendChild(majorVerValueNode);
-//			
-//			propertiesNode.appendChild(majorVerPropertyNode);
-			
+						
 			insertStatement.setInt(4, doc.get_MinorVersionNumber());
 			documentXML.addProperty("Minor_Version", "Minor Version", "Integer", String.valueOf(doc.get_MinorVersionNumber()));
 			
-//			Element minorVerPropertyNode = this.xmlDoc.createElement("Property");
-//			Element minorVerNameNode = this.xmlDoc.createElement("Name");
-//			minorVerNameNode.setTextContent("Minor_Version");
-//			minorVerPropertyNode.appendChild(minorVerNameNode);
-//			
-//			Element minorVerDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-//			minorVerDisplayNameNode.setTextContent("Minor Version");
-//			minorVerPropertyNode.appendChild(minorVerDisplayNameNode);			
-//			
-//			Element minorVerTypeNode = this.xmlDoc.createElement("Type");
-//			minorVerTypeNode.setTextContent("Integer");
-//			minorVerPropertyNode.appendChild(minorVerTypeNode);
-//			
-//			Element minorVerValueNode = this.xmlDoc.createElement("Value");
-//			minorVerValueNode.setTextContent(String.valueOf(doc.get_MinorVersionNumber()));
-//			minorVerPropertyNode.appendChild(minorVerValueNode);
-
-//			propertiesNode.appendChild(minorVerPropertyNode);
 			
 			if(dateCreated.after(new Date(0L))) {
 				insertStatement.setDate(5, new java.sql.Date(dateCreated.getTime()));
 				documentXML.addProperty("Date_Created", "Date Created", "DateTime", dateCreated.toString());
 								
-//				Element dateCreatedPropertyNode = this.xmlDoc.createElement("Property");
-//				Element dateCreatedNameNode = this.xmlDoc.createElement("Name");
-//				dateCreatedNameNode.setTextContent("Date_Created");
-//				dateCreatedPropertyNode.appendChild(dateCreatedNameNode);
-//				
-//				Element dateCreatedDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-//				dateCreatedDisplayNameNode.setTextContent("Date Created");
-//				dateCreatedPropertyNode.appendChild(dateCreatedDisplayNameNode);			
-//				
-//				Element dateCreatedTypeNode = this.xmlDoc.createElement("Type");
-//				dateCreatedTypeNode.setTextContent("DateTime");
-//				dateCreatedPropertyNode.appendChild(dateCreatedTypeNode);
-//				
-//				Element dateCreatedValueNode = this.xmlDoc.createElement("Value");
-//				dateCreatedValueNode.setTextContent(dateCreated.toString());
-//				dateCreatedPropertyNode.appendChild(dateCreatedValueNode);
-//				
-//				propertiesNode.appendChild(dateCreatedPropertyNode);
+
 			} else {
 				log.error(String.format("Incorrect Date_Created value, set to null : %s, %s, %s", doc.get_Id().toString(), classSymbolicName, dateCreated.toString()));
 				insertStatement.setDate(5, null);
@@ -399,24 +274,6 @@ public class ExportImpl extends BulkOperationThread {
 				insertStatement.setDate(6, new java.sql.Date(dateLastModified.getTime()));
 				documentXML.addProperty("Date_Last_Modified", "Date Last Modified", "DateTime", dateLastModified.toString());
 				
-//				Element dateLastModifiedPropertyNode = this.xmlDoc.createElement("Property");
-//				Element dateLastModifiedNameNode = this.xmlDoc.createElement("Name");
-//				dateLastModifiedNameNode.setTextContent("Date_Last_Modified");
-//				dateLastModifiedPropertyNode.appendChild(dateLastModifiedNameNode);
-//				
-//				Element dateLastModifiedDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-//				dateLastModifiedDisplayNameNode.setTextContent("Date Last Modified");
-//				dateLastModifiedPropertyNode.appendChild(dateLastModifiedDisplayNameNode);	
-//				
-//				Element dateLastModifiedTypeNode = this.xmlDoc.createElement("Type");
-//				dateLastModifiedTypeNode.setTextContent("DateTime");
-//				dateLastModifiedPropertyNode.appendChild(dateLastModifiedTypeNode);
-//				
-//				Element dateLastModifiedValueNode = this.xmlDoc.createElement("Value");
-//				dateLastModifiedValueNode.setTextContent(dateLastModified.toString());
-//				dateLastModifiedPropertyNode.appendChild(dateLastModifiedValueNode);
-//				
-//				propertiesNode.appendChild(dateLastModifiedPropertyNode);
 			} else {
 				log.error(String.format("Incorrect Date_Last_Modified value, set to null : %s, %s, %s", doc.get_Id().toString(), classSymbolicName, dateLastModified.toString()));
 				insertStatement.setDate(6, null);
@@ -426,70 +283,13 @@ public class ExportImpl extends BulkOperationThread {
 			insertStatement.setString(8, classSymbolicName);
 			documentXML.addProperty("Class_Symbolic_Name", "Class Name", "String", classSymbolicName);
 			
-//			Element symNamePropertyNode = this.xmlDoc.createElement("Property");
-//			Element symNameNode = this.xmlDoc.createElement("Name");
-//			symNameNode.setTextContent("Class_Symbolic_Name");
-//			symNamePropertyNode.appendChild(symNameNode);
-//			
-//			Element symNameDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-//			symNameDisplayNameNode.setTextContent("Class Name");
-//			symNamePropertyNode.appendChild(symNameDisplayNameNode);
-//			
-//			Element symNameTypeNode = this.xmlDoc.createElement("Type");
-//			symNameTypeNode.setTextContent("String");
-//			symNamePropertyNode.appendChild(symNameTypeNode);
-//			
-//			Element symNameValueNode = this.xmlDoc.createElement("Value");
-//			symNameValueNode.setTextContent(classSymbolicName);
-//			symNamePropertyNode.appendChild(symNameValueNode);
-//			
-//			propertiesNode.appendChild(symNamePropertyNode);
-			
 			String docTitle = docProperties.getStringValue("DocumentTitle");
 			insertStatement.setString(9, docTitle);
 			documentXML.addProperty("Document_Title", "Document Title", "String", docTitle);
-			
-//			Element docTitlePropertyNode = this.xmlDoc.createElement("Property");
-//			Element docTitleNode = this.xmlDoc.createElement("Name");
-//			docTitleNode.setTextContent("Document_Title");
-//			docTitlePropertyNode.appendChild(docTitleNode);
-//			
-//			Element docTitleDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-//			docTitleDisplayNameNode.setTextContent("Document Title");
-//			docTitlePropertyNode.appendChild(docTitleDisplayNameNode);
-//			
-//			Element docTitleTypeNode = this.xmlDoc.createElement("Type");
-//			docTitleTypeNode.setTextContent("String");
-//			docTitlePropertyNode.appendChild(docTitleTypeNode);
-//			
-//			Element docTitleValueNode = this.xmlDoc.createElement("Value");
-//			docTitleValueNode.setTextContent(docTitle);
-//			docTitlePropertyNode.appendChild(docTitleValueNode);
-//			
-//			propertiesNode.appendChild(docTitlePropertyNode);
-			
+						
 			String mimeType = doc.get_MimeType();
 			insertStatement.setString(10, mimeType);
 			documentXML.addProperty("MIME_Type", "MIME Type", "String", mimeType);
-			
-//			Element mimePropertyNode = this.xmlDoc.createElement("Property");
-//			Element mimeNode = this.xmlDoc.createElement("Name");
-//			mimeNode.setTextContent("MIME_Type");
-//			mimePropertyNode.appendChild(mimeNode);
-//			
-//			Element mimeDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-//			mimeDisplayNameNode.setTextContent("MIME Type");
-//			mimePropertyNode.appendChild(mimeDisplayNameNode);
-//			
-//			Element mimeTypeNode = this.xmlDoc.createElement("Type");
-//			mimeTypeNode.setTextContent("String");
-//			mimePropertyNode.appendChild(mimeTypeNode);
-//			
-//			Element mimeValueNode = this.xmlDoc.createElement("Value");
-//			mimeValueNode.setTextContent(mimeType);
-//			mimePropertyNode.appendChild(mimeValueNode);
-//			
-//			propertiesNode.appendChild(mimePropertyNode);
 			
 			StorageArea sa = doc.get_StorageArea();
 			sa.fetchProperties(new String[] {"DisplayName"});
@@ -497,31 +297,6 @@ public class ExportImpl extends BulkOperationThread {
 			insertStatement.setString(12, storageAreaName);
 			documentXML.addProperty("STORAGE_AREA", "Storage Area", "String", storageAreaName);
 			
-//			Element storageAreaPropertyNode = this.xmlDoc.createElement("Property");
-//			Element storageAreaNode = this.xmlDoc.createElement("Name");
-//			storageAreaNode.setTextContent("STORAGE_AREA");
-//			storageAreaPropertyNode.appendChild(storageAreaNode);
-//			
-//			Element storageAreaDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-//			storageAreaDisplayNameNode.setTextContent("Storage Area");
-//			storageAreaPropertyNode.appendChild(storageAreaDisplayNameNode);
-//			
-//			Element storageAreaTypeNode = this.xmlDoc.createElement("Type");
-//			storageAreaTypeNode.setTextContent("String");
-//			storageAreaPropertyNode.appendChild(storageAreaTypeNode);
-//			
-//			Element storageAreValueNode = this.xmlDoc.createElement("Value");
-//			storageAreValueNode.setTextContent(storageAreaName);
-//			storageAreaPropertyNode.appendChild(storageAreValueNode);
-//			
-//			propertiesNode.appendChild(storageAreaPropertyNode);			
-
-			
-			
-			
-//			System.out.println(queryString);
-//			System.out.println("***" + classSymbolicName);
-//			Integer pos = 11;
 			Integer pos = sysProperties.length + 1;
 			for (String s: singleValuedProperties) {
 				Object docProperty= docProperties.getObjectValue(s);
@@ -555,29 +330,7 @@ public class ExportImpl extends BulkOperationThread {
 					insertStatement.setString(pos, propertyValueStr);
 				}
 				
-				documentXML.addProperty(s, displayName, dataType, propertyValueStr);
-										
-//					Element propertyNode = this.xmlDoc.createElement("Property");
-//					
-//					Element nameNode = this.xmlDoc.createElement("Name");
-//					nameNode.setTextContent(s);
-//					propertyNode.appendChild(nameNode);
-//					
-//					Element displayNameNode = this.xmlDoc.createElement("DisplayName");
-//					displayNameNode.setTextContent(displayName);
-//					propertyNode.appendChild(displayNameNode);
-//					
-//					Element typeNode = this.xmlDoc.createElement("Type");
-//					typeNode.setTextContent(dataType);
-//					propertyNode.appendChild(typeNode);
-//					
-//					Element valueNode = this.xmlDoc.createElement("Value");
-//					valueNode.setTextContent(propertyValueStr);
-//					propertyNode.appendChild(valueNode);
-//					
-//					propertiesNode.appendChild(propertyNode);
-//					System.out.printf("%s, %s, %s, %s\n",s, displayName, dataType, propertyValueStr);
-				
+				documentXML.addProperty(s, displayName, dataType, propertyValueStr);														
 				pos++;
 			}
 
@@ -588,22 +341,14 @@ public class ExportImpl extends BulkOperationThread {
 				insertStatement.setString(7, securityPolicy.get_Id().toString());
 				insertStatement.setString(11, securityPolicy.get_DisplayName());
 				documentXML.setSecurity(securityPolicy.get_DisplayName());
-				
-//				Element securityPolicyNode = this.xmlDoc.createElement("Security");
-//				securityPolicyNode.setTextContent(securityPolicy.get_Name());
-//				docNode.appendChild(securityPolicyNode);
 			} 
-//		System.out.println(insertStatement.toString());
+
 		return insertStatement;
 		}
 	}
 		
 	
 	private void addMultiValuedProperty(Document doc, String propertySymbolicName) throws SQLException {
-//		PreparedStatement deleteContentStatement = conn.prepareStatement("DELETE FROM DOCUMENT_DB.MULTI_VALUED_PROPERTY WHERE OWNER_OBJECT_ID=UUID_TO_BIN(?)");
-//		deleteContentStatement.setString(1, doc.get_Id().toString());
-//		deleteContentStatement.execute();
-		
 		
 		String insertString= "INSERT INTO MULTI_VALUED_PROPERTY (OWNER_OBJECT_ID, SYMBOLIC_NAME, TYPE, VALUE) VALUES (UUID_TO_BIN(?), ?, ?, ?)";
 		PreparedStatement insertStatement = conn.prepareStatement(insertString);
@@ -612,19 +357,7 @@ public class ExportImpl extends BulkOperationThread {
 		String propertyClassName = properties.get(propertySymbolicName).getClass().getSimpleName();
 		String displayName = propertyDefintion.get(propertySymbolicName).get("displayName");
 		if("PropertyStringListImpl".equalsIgnoreCase(propertyClassName)) {
-
-//			Element propertyNode = this.xmlDoc.createElement("Property");
-//			Element nameNode = this.xmlDoc.createElement("Name");
-//			nameNode.setTextContent(propertySymbolicName);
-//			propertyNode.appendChild(nameNode);
-//			
-//			Element displayNameNode = this.xmlDoc.createElement("DisplayName");		
-//			displayNameNode.setTextContent(displayName);
-//			propertyNode.appendChild(displayNameNode);
-//			
-//			Element typeNode = this.xmlDoc.createElement("Type");
-//			typeNode.setTextContent("String");
-//			propertyNode.appendChild(typeNode);						
+						
 			StringList strngList = properties.getStringListValue(propertySymbolicName);
 			Iterator<String> it = strngList.iterator();
 			while(it.hasNext()) {
@@ -633,30 +366,19 @@ public class ExportImpl extends BulkOperationThread {
 				insertStatement.setString(2, propertySymbolicName);
 				insertStatement.setInt(3, 8);
 				insertStatement.setString(4, str);
-//				System.out.println(insertStatement.toString());
+
 				insertStatement.addBatch();
-				documentXML.addProperty(propertySymbolicName, displayName, "String", str);
-//				insertStatement.executeUpdate();
-				
-//				Element valueNode = this.xmlDoc.createElement("Value");
-//				valueNode.setTextContent(str);
-//				propertyNode.appendChild(valueNode);				
+				documentXML.addProperty(propertySymbolicName, displayName, "String", str);				
 			}
 			
-//			System.out.println(insertStatement.toString());
 			insertStatement.executeBatch();
 			insertStatement.close();
-//			propertiesNode.appendChild(propertyNode);
 		}
 				
 
 	}
 	private void addContent(Document doc) throws SQLException {
 		if (doc.get_ContentElements().iterator().hasNext()) {
-//			this.contentsNode = this.xmlDoc.createElement("Contents");
-//			PreparedStatement deleteContentStatement = conn.prepareStatement("DELETE FROM DOCUMENT_DB.CONTENT WHERE DOCUMENT_OBJECT_ID=UUID_TO_BIN(?)");
-//			deleteContentStatement.setString(1, doc.get_Id().toString());
-//			deleteContentStatement.execute();
 			
 			String queryString= "INSERT INTO CONTENT (OBJECT_ID, DOCUMENT_OBJECT_ID, ESN, CONTENT_TYPE, RETRIEVAL_NAME, CONTENT) VALUES (UUID_TO_BIN(UUID()), UUID_TO_BIN(?), ?, ?, ? , ?)";
 			PreparedStatement insertStatement = conn.prepareStatement(queryString);
@@ -668,7 +390,6 @@ public class ExportImpl extends BulkOperationThread {
 				doc.fetchProperties(new String[] {"RetrievalName","ElementSequenceNumber"});
 				try {
 					InputStream is = ct.accessContentStream();
-//					String filePath = "." + File.separator + "data" + File.separator + "bulkOutput" + File.separator + doc.get_Id().toString() + "_" + ct.get_RetrievalName();
 					String filePath = this.docSubDir + File.separator + "contents" /*+ File.separator + doc.get_Id().toString() + "_" + ct.get_RetrievalName()*/;
 					Files.createDirectories(Paths.get(filePath));
 					File file = new File(filePath + File.separator + doc.get_Id().toString() + "_" + ct.get_RetrievalName());
@@ -681,17 +402,6 @@ public class ExportImpl extends BulkOperationThread {
 		            os.close();
 		            is.close();
 		            is = ct.accessContentStream();
-		            
-//					Element content = this.xmlDoc.createElement("Content");
-//					Element esn = this.xmlDoc.createElement("ESN");
-//					esn.setTextContent(String.valueOf(ct.get_ElementSequenceNumber()));
-//					Element annot_path = this.xmlDoc.createElement("Path");
-//					annot_path.setTextContent(file.getPath());
-//					content.appendChild(esn);
-//					content.appendChild(annot_path);
-////					System.out.println("### " + contentsNode.toString());
-////					System.out.println("***  "+content.toString());
-//					this.contentsNode.appendChild(content);
 					
 					insertStatement.setString(1, doc.get_Id().toString());
 					insertStatement.setInt(2, ct.get_ElementSequenceNumber());
@@ -703,18 +413,12 @@ public class ExportImpl extends BulkOperationThread {
 				} catch (EngineRuntimeException e) {
 					if(e.getExceptionCode()==ExceptionCode.CONTENT_FCA_FILE_DOES_NOT_EXIST) {
 						logExportError(doc, FNExportStatus.EXPORT_CONTENT_ERROR, e.getMessage());
-//						log.error(String.format("%d,%s,%s,%s",FNExportStatus.EXPORT_CONTENT_ERROR,doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
-//						updateDocumentExportStatus(doc, FNExportStatus.EXPORT_CONTENT_ERROR);
 					}
 					else
 						logExportError(doc, FNExportStatus.OTHER_ERROR, e.getMessage());
-//						log.error(String.format("%d,%s,%s,%s",FNExportStatus.OTHER_ERROR,doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
-//						updateDocumentExportStatus(doc, FNExportStatus.OTHER_ERROR);
 
 				} catch (IOException e) {
 					logExportError(doc, FNExportStatus.EXPORT_CONTENT_ERROR, e.getMessage());
-//					log.error(String.format("%d,%s,%s,%s",FNExportStatus.EXPORT_CONTENT_ERROR,doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
-//						updateDocumentExportStatus(doc, FNExportStatus.EXPORT_CONTENT_ERROR);
 				}
 			
 			}
@@ -722,35 +426,23 @@ public class ExportImpl extends BulkOperationThread {
 				insertStatement.executeBatch();
 			} catch (BatchUpdateException e) {
 				logExportError(doc, FNExportStatus.INSERT_CONTENT_ERROR, e.getMessage());
-//				log.error(String.format("%d,%s,%s,%s",FNExportStatus.INSERT_CONTENT_ERROR, doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
-//				updateDocumentExportStatus(doc, FNExportStatus.INSERT_CONTENT_ERROR);
 			}			
-			insertStatement.close();
-//			this.docNode.appendChild(contentsNode);			
+			insertStatement.close();		
 		} else {
 			logExportError(doc, FNExportStatus.NO_CONTENT_FILE, "No Content File" );
-//			log.error(String.format("%d,%s,%s,%s",FNExportStatus.NO_CONTENT_FILE,doc.get_StorageArea().get_DisplayName(), "No Content FIle", doc.get_Id().toString()));
-//			updateDocumentExportStatus(doc, FNExportStatus.NO_CONTENT_FILE);
-//			log.error(String.format("No Content File, %s, %s", doc.get_Id().toString(), doc.get_ClassDescription().get_SymbolicName()));
+
 		}
 
 	}
 	
 	
 	private void addAnnotation(Document doc) throws SQLException, IOException {
-//		Element annotationsNode = this.xmlDoc.createElement("Annotations");
-//		PreparedStatement deleteAnnotStatement = conn.prepareStatement("DELETE FROM DOCUMENT_DB.ANNOTATION WHERE ANNOTATED_OBJECT_ID=UUID_TO_BIN(?)");
-//		deleteAnnotStatement.setString(1, doc.get_Id().toString());
-//		deleteAnnotStatement.execute();
-//		deleteAnnotStatement.close();
-		
 		
 		PreparedStatement addAnnotStatement = conn.prepareStatement("INSERT INTO ANNOTATION (OBJECT_ID,ANNOTATED_OBJECT_ID,ANNOTATED_CONTENT_ELEMENT, DATE_CREATED, DATE_LAST_MODIFIED) VALUES (UUID_TO_BIN(?),UUID_TO_BIN(?),?,?,?)");		
 		AnnotationSet annotSet =  doc.get_Annotations();
 		
 		Iterator<Annotation> annotIt = annotSet.iterator();
 		while (annotIt.hasNext()) {
-//			Element annotationNode = this.xmlDoc.createElement("Annotation");
 			Annotation annot = annotIt.next();
 			annot.fetchProperties(new String[] {"Id","AnnotatedObject","AnnotatedContentElement", "DateCreated","DateLastModified","ContentElements","ElementSequenceNumber","ContentType","RetrievalName"});			
 			com.filenet.api.property.Properties annotProperties = annot.getProperties();
@@ -760,32 +452,12 @@ public class ExportImpl extends BulkOperationThread {
 			addAnnotStatement.setDate(4, new java.sql.Date(annot.get_DateCreated().getTime()));
 			addAnnotStatement.setDate(5, new java.sql.Date(annot.get_DateLastModified().getTime()));
 			addAnnotStatement.execute();
-//			PreparedStatement deleteAnnotContentStatement = conn.prepareStatement("DELETE FROM DOCUMENT_DB.ANNOT_CONTENT WHERE ANNOT_OBJECT_ID=UUID_TO_BIN(?)");
-//			deleteAnnotContentStatement.setString(1, annot.get_Id().toString());
-//			deleteAnnotContentStatement.execute();
-//			deleteAnnotContentStatement.close();			
+			
 			PreparedStatement addAnnotContentStatement = conn.prepareStatement("INSERT INTO  DOCUMENT_DB.ANNOT_CONTENT  (OBJECT_ID, ANNOT_OBJECT_ID, ESN, CONTENT_TYPE, RETRIEVAL_NAME, CONTENT) VALUES (UUID_TO_BIN(UUID()), UUID_TO_BIN(?), ?, ?, ? , ?)");		
-
-//			Element idNode = this.xmlDoc.createElement("Id");
-//			idNode.setTextContent(annot.get_Id().toString());
-//			annotationNode.appendChild(idNode);
-//			
-//			Element dateCreatedNode = this.xmlDoc.createElement("Date_Created");
-//			dateCreatedNode.setTextContent(annot.get_DateCreated().toString());
-//			annotationNode.appendChild(dateCreatedNode);
-//			
-//			Element dateLastModifiedNode = this.xmlDoc.createElement("Date_Last_Modified");
-//			dateLastModifiedNode.setTextContent(annot.get_DateCreated().toString());
-//			annotationNode.appendChild(dateLastModifiedNode);
-//			
-//			Element esnNode = this.xmlDoc.createElement("ESN");
-//			esnNode.setTextContent(String.valueOf(annot.get_AnnotatedContentElement()));
-//			annotationNode.appendChild(esnNode);
 			
 			ContentElementList annotCEL = annot.get_ContentElements();
 			Iterator<ContentTransfer> it1 = annotCEL.iterator();
 			while(it1.hasNext()) {
-//				Element annotPathNode = this.xmlDoc.createElement("Annotation_Path");
 				String filePath = this.docSubDir + File.separator + "annoations";
 				Files.createDirectories(Paths.get(filePath));
 				ContentTransfer ct = it1.next();
@@ -794,8 +466,7 @@ public class ExportImpl extends BulkOperationThread {
 				FileOutputStream os = null;
 				try {
 					is = ct.accessContentStream();					
-	//				String filePath = "." + File.separator + "data" + File.separator + "bulkOutput" + File.separator + "annotation_" + annot.get_Id().toString() +"_"+String.valueOf(ct.get_ElementSequenceNumber()+".xml");
-	//				File file = new File(filePath);
+
 					os = new FileOutputStream(file, false);
 					
 		            int read;
@@ -808,13 +479,9 @@ public class ExportImpl extends BulkOperationThread {
 				} catch (EngineRuntimeException e) {
 					if(e.getExceptionCode()==ExceptionCode.CONTENT_FCA_FILE_DOES_NOT_EXIST)
 						logExportError(doc, FNExportStatus.EXPORT_ANNOTATION_ERROR, e.getMessage());
-//						log.error(String.format("%d,%s,%s,%s",FNExportStatus.EXPORT_ANNOTATION_ERROR, doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
-//						updateDocumentExportStatus(doc, FNExportStatus.EXPORT_ANNOTATION_ERROR);
 						
 				} catch (IOException e) {
 					logExportError(doc, FNExportStatus.EXPORT_ANNOTATION_ERROR, e.getMessage());
-//					log.error(String.format("%d,%s,%s,%s",FNExportStatus.EXPORT_ANNOTATION_ERROR, doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
-//					updateDocumentExportStatus(doc, FNExportStatus.EXPORT_ANNOTATION_ERROR);
 				}
 
 
@@ -824,30 +491,20 @@ public class ExportImpl extends BulkOperationThread {
 				addAnnotContentStatement.setString(4, ct.get_RetrievalName());
 				addAnnotContentStatement.setBinaryStream(5, ct.accessContentStream());				
 				addAnnotContentStatement.addBatch();
-//				annotPathNode.setTextContent(file.getPath());
-//				annotationNode.appendChild(annotPathNode);
 				documentXML.addAnnotation(annot.get_Id(), annot.get_DateCreated(), annot.get_DateLastModified(), annot.get_AnnotatedContentElement(), file.getPath());
 			}
 			try {
 				addAnnotContentStatement.executeBatch();
 			} catch (BatchUpdateException e) {
 				logExportError(doc, FNExportStatus.INSERT_ANNOATION_ERROR, e.getMessage());
-//				log.error(String.format("%d,%s,%s,%s",FNExportStatus.INSERT_ANNOATION_ERROR,doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
-//				updateDocumentExportStatus(doc, FNExportStatus.INSERT_ANNOATION_ERROR);
+
 			}
-//			annotationsNode.appendChild(annotationNode);
 		}
 		addAnnotStatement.close();
 //		this.docNode.appendChild(annotationsNode);
 	}
 	private void addContainer(Document doc) throws SQLException {
-//		Element foldersNode = this.xmlDoc.createElement("Folders");
-//		PreparedStatement deleteFolderStatement = conn.prepareStatement("DELETE FROM CONTAINER WHERE CONTAINEE_OBJECT_ID=UUID_TO_BIN(?)");
-//		deleteFolderStatement.setString(1, doc.get_Id().toString());
-//		deleteFolderStatement.execute();
-//		deleteFolderStatement.close();
-		
-		
+	
 		PreparedStatement addFolderStatement = conn.prepareStatement("INSERT INTO CONTAINER (OBJECT_ID,CONTAINEE_OBJECT_ID) VALUES (UUID_TO_BIN(?),UUID_TO_BIN(?))");		
 		doc.fetchProperties(new String[] {"FoldersFiledIn"});
 		FolderSet folderSet =  doc.get_FoldersFiledIn();
@@ -858,14 +515,9 @@ public class ExportImpl extends BulkOperationThread {
 			addFolderStatement.setString(1, folder.get_Id().toString());
 			addFolderStatement.setString(2, doc.get_Id().toString());
 			addFolderStatement.execute();
-			
-//			Element folderNode = this.xmlDoc.createElement("Folder");
-//			folderNode.setTextContent(folder.get_PathName());
-//			foldersNode.appendChild(folderNode);
 			documentXML.addFolder(folder.get_PathName());
 		}
 		addFolderStatement.close();
-//		this.docNode.appendChild(foldersNode);
 	}
 	
 	private String getDocSubDir(Document doc) {
@@ -877,7 +529,6 @@ public class ExportImpl extends BulkOperationThread {
 		PreparedStatement updateStatement = conn.prepareCall(updateString);
 		updateStatement.setInt(1, exportStatusCOde);
 		updateStatement.setString(2, doc.get_Id().toString());
-//		System.out.println(updateStatement.toString());
 		updateStatement.execute();
 	}
 	

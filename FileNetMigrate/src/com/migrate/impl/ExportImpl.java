@@ -501,7 +501,6 @@ public class ExportImpl extends BulkOperationThread {
 			}
 		}
 		addAnnotStatement.close();
-//		this.docNode.appendChild(annotationsNode);
 	}
 	private void addContainer(Document doc) throws SQLException {
 	

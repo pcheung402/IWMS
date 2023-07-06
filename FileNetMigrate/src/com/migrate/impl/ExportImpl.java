@@ -13,6 +13,7 @@ import java.sql.BatchUpdateException;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -261,22 +262,22 @@ public class ExportImpl extends BulkOperationThread {
 			
 			
 			if(dateCreated.after(new Date(0L))) {
-				insertStatement.setDate(5, new java.sql.Date(dateCreated.getTime()));
+				insertStatement.setTimestamp(5, new java.sql.Timestamp(dateCreated.getTime()));
 				documentXML.addProperty("Date_Created", "Date Created", "DateTime", dateCreated.toString());
 								
 
 			} else {
 				log.error(String.format("Incorrect Date_Created value, set to null : %s, %s, %s", doc.get_Id().toString(), classSymbolicName, dateCreated.toString()));
-				insertStatement.setDate(5, null);
+				insertStatement.setTimestamp(5, null);
 			}
 
 			if(dateLastModified.after(new Date(0L))) {
-				insertStatement.setDate(6, new java.sql.Date(dateLastModified.getTime()));
+				insertStatement.setTimestamp(6, new java.sql.Timestamp(dateLastModified.getTime()));
 				documentXML.addProperty("Date_Last_Modified", "Date Last Modified", "DateTime", dateLastModified.toString());
 				
 			} else {
 				log.error(String.format("Incorrect Date_Last_Modified value, set to null : %s, %s, %s", doc.get_Id().toString(), classSymbolicName, dateLastModified.toString()));
-				insertStatement.setDate(6, null);
+				insertStatement.setTimestamp(6, null);
 			}
 			
 
@@ -449,8 +450,8 @@ public class ExportImpl extends BulkOperationThread {
 			addAnnotStatement.setString(1, annot.get_Id().toString());
 			addAnnotStatement.setString(2, annotProperties.getIdValue("AnnotatedObject").toString());
 			addAnnotStatement.setInt(3, annot.get_AnnotatedContentElement());
-			addAnnotStatement.setDate(4, new java.sql.Date(annot.get_DateCreated().getTime()));
-			addAnnotStatement.setDate(5, new java.sql.Date(annot.get_DateLastModified().getTime()));
+			addAnnotStatement.setTimestamp(4, new java.sql.Timestamp(annot.get_DateCreated().getTime()));
+			addAnnotStatement.setTimestamp(5, new java.sql.Timestamp(annot.get_DateLastModified().getTime()));
 			addAnnotStatement.execute();
 			
 			PreparedStatement addAnnotContentStatement = conn.prepareStatement("INSERT INTO  DOCUMENT_DB.ANNOT_CONTENT  (OBJECT_ID, ANNOT_OBJECT_ID, ESN, CONTENT_TYPE, RETRIEVAL_NAME, CONTENT) VALUES (UUID_TO_BIN(UUID()), UUID_TO_BIN(?), ?, ?, ? , ?)");		

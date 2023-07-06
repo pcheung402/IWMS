@@ -57,9 +57,13 @@ import com.filenet.api.util.UserContext;
 import com.fn.util.CPEUtil;
 import com.fn.util.FNUtilException;
 import com.fn.util.FNUtilException.ExceptionCodeValue;
+import com.icris.util.DocumentXML;
 import com.fn.util.FNUtilLogger;
 import com.fn.util.FNExportStatus;
 import com.migrate.abs.BulkOperationThread;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
 
 public class ExportImpl extends BulkOperationThread {
 //	
@@ -87,17 +91,20 @@ public class ExportImpl extends BulkOperationThread {
 //	protected String[] isSystemProperties = {"F_ARCHIVEDATE","F_DELETEDATE","F_DOCCLASSNUMBER","F_DOCFORMAT","F_DOCLOCATION","F_DOCNUMBER","F_DOCTYPE","F_ENTRYDATE","F_PAGES","F_RETENTOFFSET"};
 //
 	
-	DocumentBuilderFactory factory;
-	DocumentBuilder builder;
-	org.w3c.dom.Document xmlDoc;
-	Element docNode;
-	Element propertiesNode;
-	Element contentsNode;
-	String docSubDir;
+//	private DocumentBuilderFactory factory;
+//	private DocumentBuilder builder;
+//	private org.w3c.dom.Document xmlDoc;
+//	private Element docNode;
+//	private Element propertiesNode;
+//	private Element contentsNode;
+	private String docSubDir;
+	private DocumentXML documentXML;
+	
 	public ExportImpl(String batchBaseDir, Document doc, FNUtilLogger log, CPEUtil cpeUtil, HashMap<String, List<String>> classPropertiesMap, HashMap<String,  HashMap<String,String>> propertyDefintion, String mode) {
 		super(batchBaseDir, doc, log, cpeUtil,classPropertiesMap, propertyDefintion, mode);
 		// TODO Auto-generated constructor stub
 		this.docSubDir = this.batchBaseDir + File.separator + "documents" + File.separator + getDocSubDir(doc);
+		
 		
 	}
 	
@@ -105,10 +112,11 @@ public class ExportImpl extends BulkOperationThread {
 	public void processBatchItem(Document doc) throws FNUtilException, IOException, SQLException {
 
 		try {
-			this.factory = DocumentBuilderFactory.newInstance();
-			this.builder = factory.newDocumentBuilder();
-			this.xmlDoc = builder.newDocument();
-			this.docNode = this.xmlDoc.createElement("Document");
+//			this.factory = DocumentBuilderFactory.newInstance();
+//			this.builder = factory.newDocumentBuilder();
+//			this.xmlDoc = builder.newDocument();
+//			this.docNode = this.xmlDoc.createElement("Document");
+			documentXML = new DocumentXML();
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -124,19 +132,28 @@ public class ExportImpl extends BulkOperationThread {
 			addContainer(doc);
 //			bulkOperationOutputDataFile.write(String.format("%s,%s,%s\n",doc.get_Name(), doc.get_Id().toString(), classSymbolicName).getBytes());
 //			bulkOperationOutputDataFile.flush();	       
-			this.xmlDoc.appendChild(docNode);
+//			this.xmlDoc.appendChild(docNode);
 			try {
-				TransformerFactory transformerFactory = TransformerFactory.newInstance();
-				Transformer transformer = transformerFactory.newTransformer();
-		        DOMSource source = new DOMSource(this.xmlDoc);
-//		        String xmlFilePath = "." + File.separator + "data" + File.separator + "bulkOutput" + File.separator + doc.get_Id().toString() +".xml";
-//		        String xmlFilePath = this.batchBaseDir + File.separator + "documents" + File.separator + doc.get_Id().toString();
-		        Files.createDirectories(Paths.get(this.docSubDir));
-		        FileOutputStream output = new FileOutputStream(docSubDir + File.separator + "properties.xml");
-		        StreamResult result = new StreamResult(output);
-		        transformer.transform(source, result);			
+//				TransformerFactory transformerFactory = TransformerFactory.newInstance();
+//				Transformer transformer = transformerFactory.newTransformer();
+//		        DOMSource source = new DOMSource(this.xmlDoc);
+////		        String xmlFilePath = "." + File.separator + "data" + File.separator + "bulkOutput" + File.separator + doc.get_Id().toString() +".xml";
+////		        String xmlFilePath = this.batchBaseDir + File.separator + "documents" + File.separator + doc.get_Id().toString();
+//		        Files.createDirectories(Paths.get(this.docSubDir));
+//		        FileOutputStream output = new FileOutputStream(docSubDir + File.separator + "properties.xml");
+//		        StreamResult result = new StreamResult(output);
+//		        transformer.transform(source, result);
+				
+		          JAXBContext jaxbContext = JAXBContext.newInstance(DocumentXML.class);
+		          Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+		 
+		          jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE); // To format XML
+		 
+		          //Print XML String to Console
+		          jaxbMarshaller.marshal(documentXML, new File(docSubDir + File.separator + "properties.xml"));
+		           
 			
-			} catch (TransformerException e) {
+			} catch (JAXBException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -263,110 +280,115 @@ public class ExportImpl extends BulkOperationThread {
 			PreparedStatement insertStatement = conn.prepareCall(queryString);
 			
 			insertStatement.setString(1, doc.get_Id().toString());
+			documentXML.addProperty("Id", "Object Id", "Id", doc.get_Id().toString());
 			
-			Element idPropertyNode = this.xmlDoc.createElement("Property");
-			Element idNameNode = this.xmlDoc.createElement("Name");
-			idNameNode.setTextContent("Id");
-			idPropertyNode.appendChild(idNameNode);
-			
-			Element idDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-			idDisplayNameNode.setTextContent("Object ID");
-			idPropertyNode.appendChild(idDisplayNameNode);
-			
-			Element idTypeNode = this.xmlDoc.createElement("Type");
-			idTypeNode.setTextContent("Id");
-			idPropertyNode.appendChild(idTypeNode);
-			
-			Element idValueNode = this.xmlDoc.createElement("Value");
-			idValueNode.setTextContent(doc.get_Id().toString());
-			idPropertyNode.appendChild(idValueNode);
-			
-			propertiesNode.appendChild(idPropertyNode);
+//			Element idPropertyNode = this.xmlDoc.createElement("Property");
+//			Element idNameNode = this.xmlDoc.createElement("Name");
+//			idNameNode.setTextContent("Id");
+//			idPropertyNode.appendChild(idNameNode);
+//			
+//			Element idDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+//			idDisplayNameNode.setTextContent("Object ID");
+//			idPropertyNode.appendChild(idDisplayNameNode);
+//			
+//			Element idTypeNode = this.xmlDoc.createElement("Type");
+//			idTypeNode.setTextContent("Id");
+//			idPropertyNode.appendChild(idTypeNode);
+//			
+//			Element idValueNode = this.xmlDoc.createElement("Value");
+//			idValueNode.setTextContent(doc.get_Id().toString());
+//			idPropertyNode.appendChild(idValueNode);
+//			
+//			propertiesNode.appendChild(idPropertyNode);
 			
 			insertStatement.setString(2, vsId.toString());
+			documentXML.addProperty("Name", "vsId", "Id", doc.get_VersionSeries().get_Id().toString());
 			
-			Element vsIdPropertyNode = this.xmlDoc.createElement("Property");
-			Element vsIdNameNode = this.xmlDoc.createElement("Name");
-			vsIdNameNode.setTextContent("vsId");
-			vsIdPropertyNode.appendChild(vsIdNameNode);
-
-			Element vsIdDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-			vsIdDisplayNameNode.setTextContent("Version Series ID");
-			vsIdPropertyNode.appendChild(vsIdDisplayNameNode);			
-			
-			Element vsIdTypeNode = this.xmlDoc.createElement("Type");
-			vsIdTypeNode.setTextContent("Id");
-			vsIdPropertyNode.appendChild(vsIdTypeNode);
-			
-			Element vsIdValueNode = this.xmlDoc.createElement("Value");
-			vsIdValueNode.setTextContent(doc.get_VersionSeries().get_Id().toString());
-			vsIdPropertyNode.appendChild(vsIdValueNode);
-			
-			propertiesNode.appendChild(vsIdPropertyNode);
+//			Element vsIdPropertyNode = this.xmlDoc.createElement("Property");
+//			Element vsIdNameNode = this.xmlDoc.createElement("Name");
+//			vsIdNameNode.setTextContent("vsId");
+//			vsIdPropertyNode.appendChild(vsIdNameNode);
+//
+//			Element vsIdDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+//			vsIdDisplayNameNode.setTextContent("Version Series ID");
+//			vsIdPropertyNode.appendChild(vsIdDisplayNameNode);			
+//			
+//			Element vsIdTypeNode = this.xmlDoc.createElement("Type");
+//			vsIdTypeNode.setTextContent("Id");
+//			vsIdPropertyNode.appendChild(vsIdTypeNode);
+//			
+//			Element vsIdValueNode = this.xmlDoc.createElement("Value");
+//			vsIdValueNode.setTextContent(doc.get_VersionSeries().get_Id().toString());
+//			vsIdPropertyNode.appendChild(vsIdValueNode);
+//			
+//			propertiesNode.appendChild(vsIdPropertyNode);
 			
 			insertStatement.setInt(3, doc.get_MajorVersionNumber());
+			documentXML.addProperty("Major_Version", "Major Version", "Integer", String.valueOf(doc.get_MajorVersionNumber()));
 			
-			Element majorVerPropertyNode = this.xmlDoc.createElement("Property");
-			Element majorVerNameNode = this.xmlDoc.createElement("Name");
-			majorVerNameNode.setTextContent("Major_Version");
-			majorVerPropertyNode.appendChild(majorVerNameNode);
-			
-			Element majorVerDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-			majorVerDisplayNameNode.setTextContent("Major Version");
-			majorVerPropertyNode.appendChild(majorVerDisplayNameNode);
-			
-			Element majorVerTypeNode = this.xmlDoc.createElement("Type");
-			majorVerTypeNode.setTextContent("Integer");
-			majorVerPropertyNode.appendChild(majorVerTypeNode);
-			
-			Element majorVerValueNode = this.xmlDoc.createElement("Value");
-			majorVerValueNode.setTextContent(String.valueOf(doc.get_MajorVersionNumber()));
-			majorVerPropertyNode.appendChild(majorVerValueNode);
-			
-			propertiesNode.appendChild(majorVerPropertyNode);
+//			Element majorVerPropertyNode = this.xmlDoc.createElement("Property");
+//			Element majorVerNameNode = this.xmlDoc.createElement("Name");
+//			majorVerNameNode.setTextContent("Major_Version");
+//			majorVerPropertyNode.appendChild(majorVerNameNode);
+//			
+//			Element majorVerDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+//			majorVerDisplayNameNode.setTextContent("Major Version");
+//			majorVerPropertyNode.appendChild(majorVerDisplayNameNode);
+//			
+//			Element majorVerTypeNode = this.xmlDoc.createElement("Type");
+//			majorVerTypeNode.setTextContent("Integer");
+//			majorVerPropertyNode.appendChild(majorVerTypeNode);
+//			
+//			Element majorVerValueNode = this.xmlDoc.createElement("Value");
+//			majorVerValueNode.setTextContent(String.valueOf(doc.get_MajorVersionNumber()));
+//			majorVerPropertyNode.appendChild(majorVerValueNode);
+//			
+//			propertiesNode.appendChild(majorVerPropertyNode);
 			
 			insertStatement.setInt(4, doc.get_MinorVersionNumber());
+			documentXML.addProperty("Minor_Version", "Minor Version", "Integer", String.valueOf(doc.get_MinorVersionNumber()));
 			
-			Element minorVerPropertyNode = this.xmlDoc.createElement("Property");
-			Element minorVerNameNode = this.xmlDoc.createElement("Name");
-			minorVerNameNode.setTextContent("Minor_Version");
-			minorVerPropertyNode.appendChild(minorVerNameNode);
-			
-			Element minorVerDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-			minorVerDisplayNameNode.setTextContent("Minor Version");
-			minorVerPropertyNode.appendChild(minorVerDisplayNameNode);			
-			
-			Element minorVerTypeNode = this.xmlDoc.createElement("Type");
-			minorVerTypeNode.setTextContent("Integer");
-			minorVerPropertyNode.appendChild(minorVerTypeNode);
-			
-			Element minorVerValueNode = this.xmlDoc.createElement("Value");
-			minorVerValueNode.setTextContent(String.valueOf(doc.get_MinorVersionNumber()));
-			minorVerPropertyNode.appendChild(minorVerValueNode);
+//			Element minorVerPropertyNode = this.xmlDoc.createElement("Property");
+//			Element minorVerNameNode = this.xmlDoc.createElement("Name");
+//			minorVerNameNode.setTextContent("Minor_Version");
+//			minorVerPropertyNode.appendChild(minorVerNameNode);
+//			
+//			Element minorVerDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+//			minorVerDisplayNameNode.setTextContent("Minor Version");
+//			minorVerPropertyNode.appendChild(minorVerDisplayNameNode);			
+//			
+//			Element minorVerTypeNode = this.xmlDoc.createElement("Type");
+//			minorVerTypeNode.setTextContent("Integer");
+//			minorVerPropertyNode.appendChild(minorVerTypeNode);
+//			
+//			Element minorVerValueNode = this.xmlDoc.createElement("Value");
+//			minorVerValueNode.setTextContent(String.valueOf(doc.get_MinorVersionNumber()));
+//			minorVerPropertyNode.appendChild(minorVerValueNode);
 
-			propertiesNode.appendChild(minorVerPropertyNode);
+//			propertiesNode.appendChild(minorVerPropertyNode);
 			
 			if(dateCreated.after(new Date(0L))) {
 				insertStatement.setDate(5, new java.sql.Date(dateCreated.getTime()));
+				documentXML.addProperty("Date_Created", "Date Created", "DateTime", dateCreated.toString());
 								
-				Element dateCreatedPropertyNode = this.xmlDoc.createElement("Property");
-				Element dateCreatedNameNode = this.xmlDoc.createElement("Name");
-				dateCreatedNameNode.setTextContent("Date_Created");
-				dateCreatedPropertyNode.appendChild(dateCreatedNameNode);
-				
-				Element dateCreatedDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-				dateCreatedDisplayNameNode.setTextContent("Date Created");
-				dateCreatedPropertyNode.appendChild(dateCreatedDisplayNameNode);			
-				
-				Element dateCreatedTypeNode = this.xmlDoc.createElement("Type");
-				dateCreatedTypeNode.setTextContent("DateTime");
-				dateCreatedPropertyNode.appendChild(dateCreatedTypeNode);
-				
-				Element dateCreatedValueNode = this.xmlDoc.createElement("Value");
-				dateCreatedValueNode.setTextContent(dateCreated.toString());
-				dateCreatedPropertyNode.appendChild(dateCreatedValueNode);
-				
-				propertiesNode.appendChild(dateCreatedPropertyNode);
+//				Element dateCreatedPropertyNode = this.xmlDoc.createElement("Property");
+//				Element dateCreatedNameNode = this.xmlDoc.createElement("Name");
+//				dateCreatedNameNode.setTextContent("Date_Created");
+//				dateCreatedPropertyNode.appendChild(dateCreatedNameNode);
+//				
+//				Element dateCreatedDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+//				dateCreatedDisplayNameNode.setTextContent("Date Created");
+//				dateCreatedPropertyNode.appendChild(dateCreatedDisplayNameNode);			
+//				
+//				Element dateCreatedTypeNode = this.xmlDoc.createElement("Type");
+//				dateCreatedTypeNode.setTextContent("DateTime");
+//				dateCreatedPropertyNode.appendChild(dateCreatedTypeNode);
+//				
+//				Element dateCreatedValueNode = this.xmlDoc.createElement("Value");
+//				dateCreatedValueNode.setTextContent(dateCreated.toString());
+//				dateCreatedPropertyNode.appendChild(dateCreatedValueNode);
+//				
+//				propertiesNode.appendChild(dateCreatedPropertyNode);
 			} else {
 				log.error(String.format("Incorrect Date_Created value, set to null : %s, %s, %s", doc.get_Id().toString(), classSymbolicName, dateCreated.toString()));
 				insertStatement.setDate(5, null);
@@ -374,119 +396,124 @@ public class ExportImpl extends BulkOperationThread {
 
 			if(dateLastModified.after(new Date(0L))) {
 				insertStatement.setDate(6, new java.sql.Date(dateLastModified.getTime()));
+				documentXML.addProperty("Date_Last_Modified", "Date Last Modified", "DateTime", dateLastModified.toString());
 				
-				Element dateLastModifiedPropertyNode = this.xmlDoc.createElement("Property");
-				Element dateLastModifiedNameNode = this.xmlDoc.createElement("Name");
-				dateLastModifiedNameNode.setTextContent("Date_Last_Modified");
-				dateLastModifiedPropertyNode.appendChild(dateLastModifiedNameNode);
-				
-				Element dateLastModifiedDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-				dateLastModifiedDisplayNameNode.setTextContent("Date Last Modified");
-				dateLastModifiedPropertyNode.appendChild(dateLastModifiedDisplayNameNode);	
-				
-				Element dateLastModifiedTypeNode = this.xmlDoc.createElement("Type");
-				dateLastModifiedTypeNode.setTextContent("DateTime");
-				dateLastModifiedPropertyNode.appendChild(dateLastModifiedTypeNode);
-				
-				Element dateLastModifiedValueNode = this.xmlDoc.createElement("Value");
-				dateLastModifiedValueNode.setTextContent(dateLastModified.toString());
-				dateLastModifiedPropertyNode.appendChild(dateLastModifiedValueNode);
-				
-				propertiesNode.appendChild(dateLastModifiedPropertyNode);
+//				Element dateLastModifiedPropertyNode = this.xmlDoc.createElement("Property");
+//				Element dateLastModifiedNameNode = this.xmlDoc.createElement("Name");
+//				dateLastModifiedNameNode.setTextContent("Date_Last_Modified");
+//				dateLastModifiedPropertyNode.appendChild(dateLastModifiedNameNode);
+//				
+//				Element dateLastModifiedDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+//				dateLastModifiedDisplayNameNode.setTextContent("Date Last Modified");
+//				dateLastModifiedPropertyNode.appendChild(dateLastModifiedDisplayNameNode);	
+//				
+//				Element dateLastModifiedTypeNode = this.xmlDoc.createElement("Type");
+//				dateLastModifiedTypeNode.setTextContent("DateTime");
+//				dateLastModifiedPropertyNode.appendChild(dateLastModifiedTypeNode);
+//				
+//				Element dateLastModifiedValueNode = this.xmlDoc.createElement("Value");
+//				dateLastModifiedValueNode.setTextContent(dateLastModified.toString());
+//				dateLastModifiedPropertyNode.appendChild(dateLastModifiedValueNode);
+//				
+//				propertiesNode.appendChild(dateLastModifiedPropertyNode);
 			} else {
 				log.error(String.format("Incorrect Date_Last_Modified value, set to null : %s, %s, %s", doc.get_Id().toString(), classSymbolicName, dateLastModified.toString()));
 				insertStatement.setDate(6, null);
 			}
 			
 
-			insertStatement.setString(8, classSymbolicName);			
+			insertStatement.setString(8, classSymbolicName);
+			documentXML.addProperty("Class_Symbolic_Name", "Class Name", "String", classSymbolicName);
 			
-			Element symNamePropertyNode = this.xmlDoc.createElement("Property");
-			Element symNameNode = this.xmlDoc.createElement("Name");
-			symNameNode.setTextContent("Class_Symbolic_Name");
-			symNamePropertyNode.appendChild(symNameNode);
-			
-			Element symNameDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-			symNameDisplayNameNode.setTextContent("Class Name");
-			symNamePropertyNode.appendChild(symNameDisplayNameNode);
-			
-			Element symNameTypeNode = this.xmlDoc.createElement("Type");
-			symNameTypeNode.setTextContent("String");
-			symNamePropertyNode.appendChild(symNameTypeNode);
-			
-			Element symNameValueNode = this.xmlDoc.createElement("Value");
-			symNameValueNode.setTextContent(classSymbolicName);
-			symNamePropertyNode.appendChild(symNameValueNode);
-			
-			propertiesNode.appendChild(symNamePropertyNode);
+//			Element symNamePropertyNode = this.xmlDoc.createElement("Property");
+//			Element symNameNode = this.xmlDoc.createElement("Name");
+//			symNameNode.setTextContent("Class_Symbolic_Name");
+//			symNamePropertyNode.appendChild(symNameNode);
+//			
+//			Element symNameDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+//			symNameDisplayNameNode.setTextContent("Class Name");
+//			symNamePropertyNode.appendChild(symNameDisplayNameNode);
+//			
+//			Element symNameTypeNode = this.xmlDoc.createElement("Type");
+//			symNameTypeNode.setTextContent("String");
+//			symNamePropertyNode.appendChild(symNameTypeNode);
+//			
+//			Element symNameValueNode = this.xmlDoc.createElement("Value");
+//			symNameValueNode.setTextContent(classSymbolicName);
+//			symNamePropertyNode.appendChild(symNameValueNode);
+//			
+//			propertiesNode.appendChild(symNamePropertyNode);
 			
 			String docTitle = docProperties.getStringValue("DocumentTitle");
 			insertStatement.setString(9, docTitle);
+			documentXML.addProperty("Document_Title", "Document Title", "String", docTitle);
 			
-			Element docTitlePropertyNode = this.xmlDoc.createElement("Property");
-			Element docTitleNode = this.xmlDoc.createElement("Name");
-			docTitleNode.setTextContent("Document_Title");
-			docTitlePropertyNode.appendChild(docTitleNode);
-			
-			Element docTitleDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-			docTitleDisplayNameNode.setTextContent("Document Title");
-			docTitlePropertyNode.appendChild(docTitleDisplayNameNode);
-			
-			Element docTitleTypeNode = this.xmlDoc.createElement("Type");
-			docTitleTypeNode.setTextContent("String");
-			docTitlePropertyNode.appendChild(docTitleTypeNode);
-			
-			Element docTitleValueNode = this.xmlDoc.createElement("Value");
-			docTitleValueNode.setTextContent(docTitle);
-			docTitlePropertyNode.appendChild(docTitleValueNode);
-			
-			propertiesNode.appendChild(docTitlePropertyNode);
+//			Element docTitlePropertyNode = this.xmlDoc.createElement("Property");
+//			Element docTitleNode = this.xmlDoc.createElement("Name");
+//			docTitleNode.setTextContent("Document_Title");
+//			docTitlePropertyNode.appendChild(docTitleNode);
+//			
+//			Element docTitleDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+//			docTitleDisplayNameNode.setTextContent("Document Title");
+//			docTitlePropertyNode.appendChild(docTitleDisplayNameNode);
+//			
+//			Element docTitleTypeNode = this.xmlDoc.createElement("Type");
+//			docTitleTypeNode.setTextContent("String");
+//			docTitlePropertyNode.appendChild(docTitleTypeNode);
+//			
+//			Element docTitleValueNode = this.xmlDoc.createElement("Value");
+//			docTitleValueNode.setTextContent(docTitle);
+//			docTitlePropertyNode.appendChild(docTitleValueNode);
+//			
+//			propertiesNode.appendChild(docTitlePropertyNode);
 			
 			String mimeType = doc.get_MimeType();
 			insertStatement.setString(10, mimeType);
+			documentXML.addProperty("MIME_Type", "MIME Type", "String", mimeType);
 			
-			Element mimePropertyNode = this.xmlDoc.createElement("Property");
-			Element mimeNode = this.xmlDoc.createElement("Name");
-			mimeNode.setTextContent("MIME_Type");
-			mimePropertyNode.appendChild(mimeNode);
-			
-			Element mimeDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-			mimeDisplayNameNode.setTextContent("MIME Type");
-			mimePropertyNode.appendChild(mimeDisplayNameNode);
-			
-			Element mimeTypeNode = this.xmlDoc.createElement("Type");
-			mimeTypeNode.setTextContent("String");
-			mimePropertyNode.appendChild(mimeTypeNode);
-			
-			Element mimeValueNode = this.xmlDoc.createElement("Value");
-			mimeValueNode.setTextContent(mimeType);
-			mimePropertyNode.appendChild(mimeValueNode);
-			
-			propertiesNode.appendChild(mimePropertyNode);
+//			Element mimePropertyNode = this.xmlDoc.createElement("Property");
+//			Element mimeNode = this.xmlDoc.createElement("Name");
+//			mimeNode.setTextContent("MIME_Type");
+//			mimePropertyNode.appendChild(mimeNode);
+//			
+//			Element mimeDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+//			mimeDisplayNameNode.setTextContent("MIME Type");
+//			mimePropertyNode.appendChild(mimeDisplayNameNode);
+//			
+//			Element mimeTypeNode = this.xmlDoc.createElement("Type");
+//			mimeTypeNode.setTextContent("String");
+//			mimePropertyNode.appendChild(mimeTypeNode);
+//			
+//			Element mimeValueNode = this.xmlDoc.createElement("Value");
+//			mimeValueNode.setTextContent(mimeType);
+//			mimePropertyNode.appendChild(mimeValueNode);
+//			
+//			propertiesNode.appendChild(mimePropertyNode);
 			
 			StorageArea sa = doc.get_StorageArea();
 			sa.fetchProperties(new String[] {"DisplayName"});
  			String storageAreaName = sa.get_DisplayName();
 			insertStatement.setString(12, storageAreaName);
+			documentXML.addProperty("STORAGE_AREA", "Storage Area", "String", storageAreaName);
 			
-			Element storageAreaPropertyNode = this.xmlDoc.createElement("Property");
-			Element storageAreaNode = this.xmlDoc.createElement("Name");
-			storageAreaNode.setTextContent("STORAGE_AREA");
-			storageAreaPropertyNode.appendChild(storageAreaNode);
-			
-			Element storageAreaDisplayNameNode = this.xmlDoc.createElement("DisplayName");
-			storageAreaDisplayNameNode.setTextContent("Storage Area");
-			storageAreaPropertyNode.appendChild(storageAreaDisplayNameNode);
-			
-			Element storageAreaTypeNode = this.xmlDoc.createElement("Type");
-			storageAreaTypeNode.setTextContent("String");
-			storageAreaPropertyNode.appendChild(storageAreaTypeNode);
-			
-			Element storageAreValueNode = this.xmlDoc.createElement("Value");
-			storageAreValueNode.setTextContent(storageAreaName);
-			storageAreaPropertyNode.appendChild(storageAreValueNode);
-			
-			propertiesNode.appendChild(storageAreaPropertyNode);			
+//			Element storageAreaPropertyNode = this.xmlDoc.createElement("Property");
+//			Element storageAreaNode = this.xmlDoc.createElement("Name");
+//			storageAreaNode.setTextContent("STORAGE_AREA");
+//			storageAreaPropertyNode.appendChild(storageAreaNode);
+//			
+//			Element storageAreaDisplayNameNode = this.xmlDoc.createElement("DisplayName");
+//			storageAreaDisplayNameNode.setTextContent("Storage Area");
+//			storageAreaPropertyNode.appendChild(storageAreaDisplayNameNode);
+//			
+//			Element storageAreaTypeNode = this.xmlDoc.createElement("Type");
+//			storageAreaTypeNode.setTextContent("String");
+//			storageAreaPropertyNode.appendChild(storageAreaTypeNode);
+//			
+//			Element storageAreValueNode = this.xmlDoc.createElement("Value");
+//			storageAreValueNode.setTextContent(storageAreaName);
+//			storageAreaPropertyNode.appendChild(storageAreValueNode);
+//			
+//			propertiesNode.appendChild(storageAreaPropertyNode);			
 
 			
 			
@@ -526,26 +553,28 @@ public class ExportImpl extends BulkOperationThread {
 					propertyValueStr = (String)docProperty;
 					insertStatement.setString(pos, propertyValueStr);
 				}
+				
+				documentXML.addProperty(s, displayName, dataType, propertyValueStr);
 										
-					Element propertyNode = this.xmlDoc.createElement("Property");
-					
-					Element nameNode = this.xmlDoc.createElement("Name");
-					nameNode.setTextContent(s);
-					propertyNode.appendChild(nameNode);
-					
-					Element displayNameNode = this.xmlDoc.createElement("DisplayName");
-					displayNameNode.setTextContent(displayName);
-					propertyNode.appendChild(displayNameNode);
-					
-					Element typeNode = this.xmlDoc.createElement("Type");
-					typeNode.setTextContent(dataType);
-					propertyNode.appendChild(typeNode);
-					
-					Element valueNode = this.xmlDoc.createElement("Value");
-					valueNode.setTextContent(propertyValueStr);
-					propertyNode.appendChild(valueNode);
-					
-					propertiesNode.appendChild(propertyNode);
+//					Element propertyNode = this.xmlDoc.createElement("Property");
+//					
+//					Element nameNode = this.xmlDoc.createElement("Name");
+//					nameNode.setTextContent(s);
+//					propertyNode.appendChild(nameNode);
+//					
+//					Element displayNameNode = this.xmlDoc.createElement("DisplayName");
+//					displayNameNode.setTextContent(displayName);
+//					propertyNode.appendChild(displayNameNode);
+//					
+//					Element typeNode = this.xmlDoc.createElement("Type");
+//					typeNode.setTextContent(dataType);
+//					propertyNode.appendChild(typeNode);
+//					
+//					Element valueNode = this.xmlDoc.createElement("Value");
+//					valueNode.setTextContent(propertyValueStr);
+//					propertyNode.appendChild(valueNode);
+//					
+//					propertiesNode.appendChild(propertyNode);
 //					System.out.printf("%s, %s, %s, %s\n",s, displayName, dataType, propertyValueStr);
 				
 				pos++;
@@ -557,9 +586,11 @@ public class ExportImpl extends BulkOperationThread {
 
 				insertStatement.setString(7, securityPolicy.get_Id().toString());
 				insertStatement.setString(11, securityPolicy.get_DisplayName());
-				Element securityPolicyNode = this.xmlDoc.createElement("Security");
-				securityPolicyNode.setTextContent(securityPolicy.get_Name());
-				docNode.appendChild(securityPolicyNode);
+				documentXML.setSecurity(securityPolicy.get_DisplayName());
+				
+//				Element securityPolicyNode = this.xmlDoc.createElement("Security");
+//				securityPolicyNode.setTextContent(securityPolicy.get_Name());
+//				docNode.appendChild(securityPolicyNode);
 			} 
 //		System.out.println(insertStatement.toString());
 		return insertStatement;
@@ -581,18 +612,18 @@ public class ExportImpl extends BulkOperationThread {
 		String displayName = propertyDefintion.get(propertySymbolicName).get("displayName");
 		if("PropertyStringListImpl".equalsIgnoreCase(propertyClassName)) {
 
-			Element propertyNode = this.xmlDoc.createElement("Property");
-			Element nameNode = this.xmlDoc.createElement("Name");
-			nameNode.setTextContent(propertySymbolicName);
-			propertyNode.appendChild(nameNode);
-			
-			Element displayNameNode = this.xmlDoc.createElement("DisplayName");		
-			displayNameNode.setTextContent(displayName);
-			propertyNode.appendChild(displayNameNode);
-			
-			Element typeNode = this.xmlDoc.createElement("Type");
-			typeNode.setTextContent("String");
-			propertyNode.appendChild(typeNode);						
+//			Element propertyNode = this.xmlDoc.createElement("Property");
+//			Element nameNode = this.xmlDoc.createElement("Name");
+//			nameNode.setTextContent(propertySymbolicName);
+//			propertyNode.appendChild(nameNode);
+//			
+//			Element displayNameNode = this.xmlDoc.createElement("DisplayName");		
+//			displayNameNode.setTextContent(displayName);
+//			propertyNode.appendChild(displayNameNode);
+//			
+//			Element typeNode = this.xmlDoc.createElement("Type");
+//			typeNode.setTextContent("String");
+//			propertyNode.appendChild(typeNode);						
 			StringList strngList = properties.getStringListValue(propertySymbolicName);
 			Iterator<String> it = strngList.iterator();
 			while(it.hasNext()) {
@@ -603,23 +634,18 @@ public class ExportImpl extends BulkOperationThread {
 				insertStatement.setString(4, str);
 //				System.out.println(insertStatement.toString());
 				insertStatement.addBatch();
+				documentXML.addProperty(propertySymbolicName, displayName, "String", str);
 //				insertStatement.executeUpdate();
 				
-				Element valueNode = this.xmlDoc.createElement("Value");
-				valueNode.setTextContent(str);
-				propertyNode.appendChild(valueNode);				
+//				Element valueNode = this.xmlDoc.createElement("Value");
+//				valueNode.setTextContent(str);
+//				propertyNode.appendChild(valueNode);				
 			}
 			
 //			System.out.println(insertStatement.toString());
 			insertStatement.executeBatch();
 			insertStatement.close();
-//			try {
-//				Thread.sleep(10000);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-			propertiesNode.appendChild(propertyNode);
+//			propertiesNode.appendChild(propertyNode);
 		}
 				
 
@@ -654,23 +680,25 @@ public class ExportImpl extends BulkOperationThread {
 		            os.close();
 		            is.close();
 		            is = ct.accessContentStream();
-					Element content = this.xmlDoc.createElement("Content");
-					Element esn = this.xmlDoc.createElement("ESN");
-					esn.setTextContent(String.valueOf(ct.get_ElementSequenceNumber()));
-					Element annot_path = this.xmlDoc.createElement("Path");
-					annot_path.setTextContent(file.getPath());
-					content.appendChild(esn);
-					content.appendChild(annot_path);
-//					System.out.println("### " + contentsNode.toString());
-//					System.out.println("***  "+content.toString());
-					this.contentsNode.appendChild(content);
+		            
+//					Element content = this.xmlDoc.createElement("Content");
+//					Element esn = this.xmlDoc.createElement("ESN");
+//					esn.setTextContent(String.valueOf(ct.get_ElementSequenceNumber()));
+//					Element annot_path = this.xmlDoc.createElement("Path");
+//					annot_path.setTextContent(file.getPath());
+//					content.appendChild(esn);
+//					content.appendChild(annot_path);
+////					System.out.println("### " + contentsNode.toString());
+////					System.out.println("***  "+content.toString());
+//					this.contentsNode.appendChild(content);
 					
 					insertStatement.setString(1, doc.get_Id().toString());
 					insertStatement.setInt(2, ct.get_ElementSequenceNumber());
 					insertStatement.setString(3, ct.get_ContentType());
 					insertStatement.setString(4, ct.get_RetrievalName());
 					insertStatement.setBinaryStream(5, is);
-					insertStatement.addBatch();	
+					insertStatement.addBatch();						
+					documentXML.addContent(ct.get_ElementSequenceNumber(), file.getPath());
 				} catch (EngineRuntimeException e) {
 					if(e.getExceptionCode()==ExceptionCode.CONTENT_FCA_FILE_DOES_NOT_EXIST) {
 						logExportError(doc, FNExportStatus.EXPORT_CONTENT_ERROR, e.getMessage());
@@ -737,26 +765,26 @@ public class ExportImpl extends BulkOperationThread {
 //			deleteAnnotContentStatement.close();			
 			PreparedStatement addAnnotContentStatement = conn.prepareStatement("INSERT INTO  DOCUMENT_DB.ANNOT_CONTENT  (OBJECT_ID, ANNOT_OBJECT_ID, ESN, CONTENT_TYPE, RETRIEVAL_NAME, CONTENT) VALUES (UUID_TO_BIN(UUID()), UUID_TO_BIN(?), ?, ?, ? , ?)");		
 
-			Element idNode = this.xmlDoc.createElement("Id");
-			idNode.setTextContent(annot.get_Id().toString());
-			annotationNode.appendChild(idNode);
-			
-			Element dateCreatedNode = this.xmlDoc.createElement("Date_Created");
-			dateCreatedNode.setTextContent(annot.get_DateCreated().toString());
-			annotationNode.appendChild(dateCreatedNode);
-			
-			Element dateLastModifiedNode = this.xmlDoc.createElement("Date_Last_Modified");
-			dateLastModifiedNode.setTextContent(annot.get_DateCreated().toString());
-			annotationNode.appendChild(dateLastModifiedNode);
-			
-			Element esnNode = this.xmlDoc.createElement("ESN");
-			esnNode.setTextContent(String.valueOf(annot.get_AnnotatedContentElement()));
-			annotationNode.appendChild(esnNode);
+//			Element idNode = this.xmlDoc.createElement("Id");
+//			idNode.setTextContent(annot.get_Id().toString());
+//			annotationNode.appendChild(idNode);
+//			
+//			Element dateCreatedNode = this.xmlDoc.createElement("Date_Created");
+//			dateCreatedNode.setTextContent(annot.get_DateCreated().toString());
+//			annotationNode.appendChild(dateCreatedNode);
+//			
+//			Element dateLastModifiedNode = this.xmlDoc.createElement("Date_Last_Modified");
+//			dateLastModifiedNode.setTextContent(annot.get_DateCreated().toString());
+//			annotationNode.appendChild(dateLastModifiedNode);
+//			
+//			Element esnNode = this.xmlDoc.createElement("ESN");
+//			esnNode.setTextContent(String.valueOf(annot.get_AnnotatedContentElement()));
+//			annotationNode.appendChild(esnNode);
 			
 			ContentElementList annotCEL = annot.get_ContentElements();
 			Iterator<ContentTransfer> it1 = annotCEL.iterator();
 			while(it1.hasNext()) {
-				Element annotPathNode = this.xmlDoc.createElement("Annotation_Path");
+//				Element annotPathNode = this.xmlDoc.createElement("Annotation_Path");
 				String filePath = this.docSubDir + File.separator + "annoations";
 				Files.createDirectories(Paths.get(filePath));
 				ContentTransfer ct = it1.next();
@@ -795,8 +823,9 @@ public class ExportImpl extends BulkOperationThread {
 				addAnnotContentStatement.setString(4, ct.get_RetrievalName());
 				addAnnotContentStatement.setBinaryStream(5, ct.accessContentStream());				
 				addAnnotContentStatement.addBatch();
-				annotPathNode.setTextContent(file.getPath());
-				annotationNode.appendChild(annotPathNode);
+//				annotPathNode.setTextContent(file.getPath());
+//				annotationNode.appendChild(annotPathNode);
+				documentXML.addAnnotation(annot.get_Id(), annot.get_DateCreated(), annot.get_DateLastModified(), annot.get_AnnotatedContentElement(), file.getPath());
 			}
 			try {
 				addAnnotContentStatement.executeBatch();
@@ -805,7 +834,7 @@ public class ExportImpl extends BulkOperationThread {
 //				log.error(String.format("%d,%s,%s,%s",FNExportStatus.INSERT_ANNOATION_ERROR,doc.get_StorageArea().get_DisplayName(), e.getMessage(), doc.get_Id().toString()));
 //				updateDocumentExportStatus(doc, FNExportStatus.INSERT_ANNOATION_ERROR);
 			}
-			annotationsNode.appendChild(annotationNode);
+//			annotationsNode.appendChild(annotationNode);
 		}
 		addAnnotStatement.close();
 		this.docNode.appendChild(annotationsNode);
@@ -829,12 +858,13 @@ public class ExportImpl extends BulkOperationThread {
 			addFolderStatement.setString(2, doc.get_Id().toString());
 			addFolderStatement.execute();
 			
-			Element folderNode = this.xmlDoc.createElement("Folder");
-			folderNode.setTextContent(folder.get_PathName());
-			foldersNode.appendChild(folderNode);
+//			Element folderNode = this.xmlDoc.createElement("Folder");
+//			folderNode.setTextContent(folder.get_PathName());
+//			foldersNode.appendChild(folderNode);
+			documentXML.addFolder(folder.get_PathName());
 		}
 		addFolderStatement.close();
-		this.docNode.appendChild(foldersNode);
+//		this.docNode.appendChild(foldersNode);
 	}
 	
 	private String getDocSubDir(String docId) {

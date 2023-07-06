@@ -57,12 +57,13 @@ import com.filenet.api.util.UserContext;
 import com.fn.util.CPEUtil;
 import com.fn.util.FNUtilException;
 import com.fn.util.FNUtilException.ExceptionCodeValue;
-import com.icris.util.DocumentXML;
+import com.fn.util.DocumentXML;
 import com.fn.util.FNUtilLogger;
 import com.fn.util.FNExportStatus;
 import com.migrate.abs.BulkOperationThread;
 
 import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 
 public class ExportImpl extends BulkOperationThread {
@@ -110,17 +111,17 @@ public class ExportImpl extends BulkOperationThread {
 	
 
 	public void processBatchItem(Document doc) throws FNUtilException, IOException, SQLException {
-
-		try {
-//			this.factory = DocumentBuilderFactory.newInstance();
-//			this.builder = factory.newDocumentBuilder();
-//			this.xmlDoc = builder.newDocument();
-//			this.docNode = this.xmlDoc.createElement("Document");
-			documentXML = new DocumentXML();
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		documentXML = new DocumentXML();
+//		try {
+////			this.factory = DocumentBuilderFactory.newInstance();
+////			this.builder = factory.newDocumentBuilder();
+////			this.xmlDoc = builder.newDocument();
+////			this.docNode = this.xmlDoc.createElement("Document");
+//			
+//		} catch (ParserConfigurationException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		ClassDescription cd = doc.get_ClassDescription();
 		String classSymbolicName = cd.get_SymbolicName();
 		String classDisplayName = cd.get_DisplayName();
@@ -173,7 +174,7 @@ public class ExportImpl extends BulkOperationThread {
 		deleteDocumentStatement.execute();
 //		System.out.println("3333333333333333");	
 		Boolean result = Boolean.FALSE;
-		propertiesNode = this.xmlDoc.createElement("Properties");
+//		propertiesNode = this.xmlDoc.createElement("Properties");
 		ClassDescription cd = doc.get_ClassDescription();
 		String classSymbolicName = cd.get_SymbolicName();
 		
@@ -580,7 +581,7 @@ public class ExportImpl extends BulkOperationThread {
 				pos++;
 			}
 
-			this.docNode.appendChild(propertiesNode);
+//			this.docNode.appendChild(propertiesNode);
 			
 			if(securityPolicy!=null) {
 
@@ -652,7 +653,7 @@ public class ExportImpl extends BulkOperationThread {
 	}
 	private void addContent(Document doc) throws SQLException {
 		if (doc.get_ContentElements().iterator().hasNext()) {
-			this.contentsNode = this.xmlDoc.createElement("Contents");
+//			this.contentsNode = this.xmlDoc.createElement("Contents");
 //			PreparedStatement deleteContentStatement = conn.prepareStatement("DELETE FROM DOCUMENT_DB.CONTENT WHERE DOCUMENT_OBJECT_ID=UUID_TO_BIN(?)");
 //			deleteContentStatement.setString(1, doc.get_Id().toString());
 //			deleteContentStatement.execute();
@@ -725,7 +726,7 @@ public class ExportImpl extends BulkOperationThread {
 //				updateDocumentExportStatus(doc, FNExportStatus.INSERT_CONTENT_ERROR);
 			}			
 			insertStatement.close();
-			this.docNode.appendChild(contentsNode);			
+//			this.docNode.appendChild(contentsNode);			
 		} else {
 			logExportError(doc, FNExportStatus.NO_CONTENT_FILE, "No Content File" );
 //			log.error(String.format("%d,%s,%s,%s",FNExportStatus.NO_CONTENT_FILE,doc.get_StorageArea().get_DisplayName(), "No Content FIle", doc.get_Id().toString()));
@@ -737,7 +738,7 @@ public class ExportImpl extends BulkOperationThread {
 	
 	
 	private void addAnnotation(Document doc) throws SQLException, IOException {
-		Element annotationsNode = this.xmlDoc.createElement("Annotations");
+//		Element annotationsNode = this.xmlDoc.createElement("Annotations");
 //		PreparedStatement deleteAnnotStatement = conn.prepareStatement("DELETE FROM DOCUMENT_DB.ANNOTATION WHERE ANNOTATED_OBJECT_ID=UUID_TO_BIN(?)");
 //		deleteAnnotStatement.setString(1, doc.get_Id().toString());
 //		deleteAnnotStatement.execute();
@@ -749,7 +750,7 @@ public class ExportImpl extends BulkOperationThread {
 		
 		Iterator<Annotation> annotIt = annotSet.iterator();
 		while (annotIt.hasNext()) {
-			Element annotationNode = this.xmlDoc.createElement("Annotation");
+//			Element annotationNode = this.xmlDoc.createElement("Annotation");
 			Annotation annot = annotIt.next();
 			annot.fetchProperties(new String[] {"Id","AnnotatedObject","AnnotatedContentElement", "DateCreated","DateLastModified","ContentElements","ElementSequenceNumber","ContentType","RetrievalName"});			
 			com.filenet.api.property.Properties annotProperties = annot.getProperties();
@@ -837,10 +838,10 @@ public class ExportImpl extends BulkOperationThread {
 //			annotationsNode.appendChild(annotationNode);
 		}
 		addAnnotStatement.close();
-		this.docNode.appendChild(annotationsNode);
+//		this.docNode.appendChild(annotationsNode);
 	}
 	private void addContainer(Document doc) throws SQLException {
-		Element foldersNode = this.xmlDoc.createElement("Folders");
+//		Element foldersNode = this.xmlDoc.createElement("Folders");
 //		PreparedStatement deleteFolderStatement = conn.prepareStatement("DELETE FROM CONTAINER WHERE CONTAINEE_OBJECT_ID=UUID_TO_BIN(?)");
 //		deleteFolderStatement.setString(1, doc.get_Id().toString());
 //		deleteFolderStatement.execute();
@@ -867,8 +868,8 @@ public class ExportImpl extends BulkOperationThread {
 //		this.docNode.appendChild(foldersNode);
 	}
 	
-	private String getDocSubDir(String docId) {
-		return docId;
+	private String getDocSubDir(Document doc) {
+		return doc.get_Id().toString();
 	}
 	
 	private void updateDocumentExportStatus(Document doc, Integer exportStatusCOde) throws SQLException{

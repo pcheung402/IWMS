@@ -95,13 +95,14 @@ public class ExportImpl extends BulkOperationThread {
 	
 	private String docSubDir;
 	private DocumentXML documentXML;
+	private String[] propertiesNameArray;
+	private ArrayList<String>  singleValuedProperties;
+	private ArrayList<String>  multiValuedProperties;
 	
 	public ExportImpl(String batchBaseDir, Document doc, FNUtilLogger log, CPEUtil cpeUtil, HashMap<String, List<String>> classPropertiesMap, HashMap<String,  HashMap<String,String>> propertyDefintion, String mode) {
 		super(batchBaseDir, doc, log, cpeUtil,classPropertiesMap, propertyDefintion, mode);
 		// TODO Auto-generated constructor stub
-		this.docSubDir = this.batchBaseDir + File.separator + "documents" + File.separator + getDocSubDir(doc);
-		
-		
+		this.docSubDir = this.batchBaseDir + File.separator + "documents" + File.separator + getDocSubDir(doc);		
 	}
 	
 
@@ -109,8 +110,36 @@ public class ExportImpl extends BulkOperationThread {
 		documentXML = new DocumentXML();
 		ClassDescription cd = doc.get_ClassDescription();
 		String classSymbolicName = cd.get_SymbolicName();
-		String classDisplayName = cd.get_DisplayName();
+		if(classPropertiesMap.get(classSymbolicName)==null) {
+			log.error(String.format("Invalid Document Class : %s,%s", doc.get_Id().toString(), classSymbolicName));
+			return;
+		}		
+		this.propertiesNameArray = classPropertiesMap.get(classSymbolicName).toArray(new String[0]);
+		this.singleValuedProperties = new ArrayList<String>();
+		this.multiValuedProperties = new ArrayList<String>();
+		for (int i = 0; i < propertiesNameArray.length; ++i) {
+			String dataType = propertyDefintion.get(propertiesNameArray[i]).get("dataType");
 
+			if("String".equalsIgnoreCase(dataType)||
+					"DateTime".equalsIgnoreCase(dataType)||
+					"Id".equalsIgnoreCase(dataType)||
+					"Integer".equalsIgnoreCase(dataType)||
+					"Double".equalsIgnoreCase(dataType)||
+					"Boolean".equalsIgnoreCase(dataType)
+					) {
+				singleValuedProperties.add(propertiesNameArray[i]);
+			} else if ("StringList".equalsIgnoreCase(dataType)||
+					"DateTimeList".equalsIgnoreCase(dataType)||
+					"IdList".equalsIgnoreCase(dataType)||
+					"IntegerList".equalsIgnoreCase(dataType)||
+					"DoubleList".equalsIgnoreCase(dataType)||
+					"BooleanList".equalsIgnoreCase(dataType)
+					) {
+				multiValuedProperties.add(propertiesNameArray[i]);
+			}
+		}
+
+		
 		if(createDocument(doc)) {
 //			System.out.println("document created");
 			addContent(doc);
@@ -177,175 +206,143 @@ public class ExportImpl extends BulkOperationThread {
 	}
 	
 	private PreparedStatement pepareInsertStatement(Document doc, String classSymbolicName) throws SQLException {
-	
-		String[] propertiesNameArray = classPropertiesMap.get(classSymbolicName).toArray(new String[0]);
-		ArrayList<String>  singleValuedProperties = new ArrayList<String>();
-		ArrayList<String>  multiValuedProperties = new ArrayList<String>();
-		for (int i = 0; i < propertiesNameArray.length; ++i) {
-			String dataType = propertyDefintion.get(propertiesNameArray[i]).get("dataType");
 
-			if("String".equalsIgnoreCase(dataType)||
-					"DateTime".equalsIgnoreCase(dataType)||
-					"Id".equalsIgnoreCase(dataType)||
-					"Integer".equalsIgnoreCase(dataType)||
-					"Double".equalsIgnoreCase(dataType)||
-					"Boolean".equalsIgnoreCase(dataType)
-					) {
-				singleValuedProperties.add(propertiesNameArray[i]);
-			} else if ("StringList".equalsIgnoreCase(dataType)||
-					"DateTimeList".equalsIgnoreCase(dataType)||
-					"IdList".equalsIgnoreCase(dataType)||
-					"IntegerList".equalsIgnoreCase(dataType)||
-					"DoubleList".equalsIgnoreCase(dataType)||
-					"BooleanList".equalsIgnoreCase(dataType)
-					) {
-				multiValuedProperties.add(propertiesNameArray[i]);
-			}
-		}
+		doc.fetchProperties(propertiesNameArray);
+		Properties docProperties = doc.getProperties();
+		Id vsId = doc.get_VersionSeries().get_Id();
+		SecurityPolicy securityPolicy = doc.get_SecurityPolicy();
+		securityPolicy.fetchProperties(new String[] {"DisplayName"});
+		Date dateCreated = doc.get_DateCreated();
+		Date dateLastModified = doc.get_DateLastModified();
+		
+		String[] sysProperties = {
+				"OBJECT_ID",
+				"OBJECT_VSID",
+				"MAJOR_VER",
+				"MINOR_VER",
+				"DATE_CREATED",
+				"DATE_LAST_MODIFIED",
+				"SECURITY_POLICY",
+				"CLASS_SYMBOLIC_NAME",
+				"DOCUMENTTITLE",
+				"MIME_TYPE",
+				"SECURITY_NAME",
+				"STORAGE_AREA_NAME"
+		};
 
-		if(classPropertiesMap.get(classSymbolicName)==null) {
-			log.error(String.format("Invalid Document Class : %s,%s", doc.get_Id().toString(), classSymbolicName));
-			return null;
-		} else {
-
-			doc.fetchProperties(propertiesNameArray);
-			Properties docProperties = doc.getProperties();
-			Id vsId = doc.get_VersionSeries().get_Id();
-			SecurityPolicy securityPolicy = doc.get_SecurityPolicy();
-			securityPolicy.fetchProperties(new String[] {"DisplayName"});
-			Date dateCreated = doc.get_DateCreated();
-			Date dateLastModified = doc.get_DateLastModified();
-			
-			String[] sysProperties = {
-					"OBJECT_ID",
-					"OBJECT_VSID",
-					"MAJOR_VER",
-					"MINOR_VER",
-					"DATE_CREATED",
-					"DATE_LAST_MODIFIED",
-					"SECURITY_POLICY",
-					"CLASS_SYMBOLIC_NAME",
-					"DOCUMENTTITLE",
-					"MIME_TYPE",
-					"SECURITY_NAME",
-					"STORAGE_AREA_NAME"
-			};
-
-			String queryString= "REPLACE INTO DOCUMENT ("
+		String queryString= "REPLACE INTO DOCUMENT ("
 //					+ "OBJECT_ID,OBJECT_VSID,MAJOR_VER,MINOR_VER,DATE_CREATED,DATE_LAST_MODIFIED,SECURITY_POLICY,CLASS_SYMBOLIC_NAME,DOCUMENTTITLE,MIME_TYPE"
-					+ String.join(",", sysProperties)
-					+ "," 
-					+ String.join(",", singleValuedProperties)									
-					+ ") VALUES (UUID_TO_BIN(?),UUID_TO_BIN(?),?,?,?,?,UUID_TO_BIN(?),?,?,?,?,?";
-			
+				+ String.join(",", sysProperties)
+				+ "," 
+				+ String.join(",", singleValuedProperties)									
+				+ ") VALUES (UUID_TO_BIN(?),UUID_TO_BIN(?),?,?,?,?,UUID_TO_BIN(?),?,?,?,?,?";
+		
 //			queryString += ",?".repeat(singleValuedProperties.size());
-			for (String s:singleValuedProperties) {
-				queryString += ",?";
-			}
-		
-		
-			queryString += ")";
+		for (String s:singleValuedProperties) {
+			queryString += ",?";
+		}
+	
+	
+		queryString += ")";
 ;			
 			PreparedStatement insertStatement = conn.prepareCall(queryString);
 			
 			insertStatement.setString(1, doc.get_Id().toString());
 			documentXML.addProperty("Id", "Object Id", "Id", doc.get_Id().toString());
-						
-			insertStatement.setString(2, vsId.toString());
-			documentXML.addProperty("Name", "vsId", "Id", doc.get_VersionSeries().get_Id().toString());
-						
-			insertStatement.setInt(3, doc.get_MajorVersionNumber());
-			documentXML.addProperty("Major_Version", "Major Version", "Integer", String.valueOf(doc.get_MajorVersionNumber()));
-						
-			insertStatement.setInt(4, doc.get_MinorVersionNumber());
-			documentXML.addProperty("Minor_Version", "Minor Version", "Integer", String.valueOf(doc.get_MinorVersionNumber()));
-			
-			
-			if(dateCreated.after(new Date(0L))) {
-				insertStatement.setTimestamp(5, new java.sql.Timestamp(dateCreated.getTime()));
-				documentXML.addProperty("Date_Created", "Date Created", "DateTime", dateCreated.toString());
-								
+					
+		insertStatement.setString(2, vsId.toString());
+		documentXML.addProperty("Name", "vsId", "Id", doc.get_VersionSeries().get_Id().toString());
+					
+		insertStatement.setInt(3, doc.get_MajorVersionNumber());
+		documentXML.addProperty("Major_Version", "Major Version", "Integer", String.valueOf(doc.get_MajorVersionNumber()));
+					
+		insertStatement.setInt(4, doc.get_MinorVersionNumber());
+		documentXML.addProperty("Minor_Version", "Minor Version", "Integer", String.valueOf(doc.get_MinorVersionNumber()));
+		
+		
+		if(dateCreated.after(new Date(0L))) {
+			insertStatement.setTimestamp(5, new java.sql.Timestamp(dateCreated.getTime()));
+			documentXML.addProperty("Date_Created", "Date Created", "DateTime", dateCreated.toString());
+							
 
-			} else {
-				log.error(String.format("Incorrect Date_Created value, set to null : %s, %s, %s", doc.get_Id().toString(), classSymbolicName, dateCreated.toString()));
-				insertStatement.setTimestamp(5, null);
-			}
+		} else {
+			log.error(String.format("Incorrect Date_Created value, set to null : %s, %s, %s", doc.get_Id().toString(), classSymbolicName, dateCreated.toString()));
+			insertStatement.setTimestamp(5, null);
+		}
 
-			if(dateLastModified.after(new Date(0L))) {
-				insertStatement.setTimestamp(6, new java.sql.Timestamp(dateLastModified.getTime()));
-				documentXML.addProperty("Date_Last_Modified", "Date Last Modified", "DateTime", dateLastModified.toString());
-				
-			} else {
-				log.error(String.format("Incorrect Date_Last_Modified value, set to null : %s, %s, %s", doc.get_Id().toString(), classSymbolicName, dateLastModified.toString()));
-				insertStatement.setTimestamp(6, null);
-			}
+		if(dateLastModified.after(new Date(0L))) {
+			insertStatement.setTimestamp(6, new java.sql.Timestamp(dateLastModified.getTime()));
+			documentXML.addProperty("Date_Last_Modified", "Date Last Modified", "DateTime", dateLastModified.toString());
 			
+		} else {
+			log.error(String.format("Incorrect Date_Last_Modified value, set to null : %s, %s, %s", doc.get_Id().toString(), classSymbolicName, dateLastModified.toString()));
+			insertStatement.setTimestamp(6, null);
+		}
+		
 
-			insertStatement.setString(8, classSymbolicName);
-			documentXML.addProperty("Class_Symbolic_Name", "Class Name", "String", classSymbolicName);
-			
-			String docTitle = docProperties.getStringValue("DocumentTitle");
-			insertStatement.setString(9, docTitle);
-			documentXML.addProperty("Document_Title", "Document Title", "String", docTitle);
-						
-			String mimeType = doc.get_MimeType();
-			insertStatement.setString(10, mimeType);
-			documentXML.addProperty("MIME_Type", "MIME Type", "String", mimeType);
-			
-			StorageArea sa = doc.get_StorageArea();
-			sa.fetchProperties(new String[] {"DisplayName"});
- 			String storageAreaName = sa.get_DisplayName();
-			insertStatement.setString(12, storageAreaName);
-			documentXML.addProperty("STORAGE_AREA", "Storage Area", "String", storageAreaName);
-			
-			Integer pos = sysProperties.length + 1;
-			for (String s: singleValuedProperties) {
-				Object docProperty= docProperties.getObjectValue(s);
-				String dataType = propertyDefintion.get(s).get("dataType");
-				String displayName = propertyDefintion.get(s).get("displayName");
-				String propertyValueStr=null;
+		insertStatement.setString(8, classSymbolicName);
+		documentXML.addProperty("Class_Symbolic_Name", "Class Name", "String", classSymbolicName);
+		
+		String docTitle = docProperties.getStringValue("DocumentTitle");
+		insertStatement.setString(9, docTitle);
+		documentXML.addProperty("Document_Title", "Document Title", "String", docTitle);
+					
+		String mimeType = doc.get_MimeType();
+		insertStatement.setString(10, mimeType);
+		documentXML.addProperty("MIME_Type", "MIME Type", "String", mimeType);
+		
+		StorageArea sa = doc.get_StorageArea();
+		sa.fetchProperties(new String[] {"DisplayName"});
+		String storageAreaName = sa.get_DisplayName();
+		insertStatement.setString(12, storageAreaName);
+		documentXML.addProperty("STORAGE_AREA", "Storage Area", "String", storageAreaName);
+		
+		Integer pos = sysProperties.length + 1;
+		for (String s: singleValuedProperties) {
+			Object docProperty= docProperties.getObjectValue(s);
+			String dataType = propertyDefintion.get(s).get("dataType");
+			String displayName = propertyDefintion.get(s).get("displayName");
+			String propertyValueStr=null;
 //				System.out.println("data type :" + s+":"+dataType);
-				if (docProperty == null) {
-					insertStatement.setObject(pos , null);
-				} else if ("Id".equalsIgnoreCase(dataType)) {
-					insertStatement.setString(pos,propertyValueStr);
-					propertyValueStr = ((Id)docProperty).toString();
-				} else if ("DateTime".equalsIgnoreCase(dataType)) {
-					Date dateValue = ((Date)docProperty);
-					propertyValueStr =dateValue.toString();
-					insertStatement.setDate(pos, new java.sql.Date(dateValue.getTime()));
-				} else if ("Integer".equalsIgnoreCase(dataType)) {
-					Integer intValue =  ((Integer)docProperty);
-					propertyValueStr = String.valueOf(intValue);
-					insertStatement.setInt(pos, intValue);
-				} else if ("Double".equalsIgnoreCase(dataType)) {
-					Double doubleValue = (Double)docProperty;
-					propertyValueStr = String.valueOf(doubleValue);
-					insertStatement.setDouble(pos, doubleValue);						
-				} else if ("Boolean".equalsIgnoreCase(dataType)) {						
-					Boolean boolValue = (Boolean)docProperty;
-					propertyValueStr = String.valueOf(boolValue);
-					insertStatement.setBoolean(pos, boolValue);
-				}  else if ("String".equalsIgnoreCase(dataType)) {						
-					propertyValueStr = (String)docProperty;
-					insertStatement.setString(pos, propertyValueStr);
-				}
-				
-				documentXML.addProperty(s, displayName, dataType, propertyValueStr);														
-				pos++;
+			if (docProperty == null) {
+				insertStatement.setObject(pos , null);
+			} else if ("Id".equalsIgnoreCase(dataType)) {
+				insertStatement.setString(pos,propertyValueStr);
+				propertyValueStr = ((Id)docProperty).toString();
+			} else if ("DateTime".equalsIgnoreCase(dataType)) {
+				Date dateValue = ((Date)docProperty);
+				propertyValueStr =dateValue.toString();
+				insertStatement.setDate(pos, new java.sql.Date(dateValue.getTime()));
+			} else if ("Integer".equalsIgnoreCase(dataType)) {
+				Integer intValue =  ((Integer)docProperty);
+				propertyValueStr = String.valueOf(intValue);
+				insertStatement.setInt(pos, intValue);
+			} else if ("Double".equalsIgnoreCase(dataType)) {
+				Double doubleValue = (Double)docProperty;
+				propertyValueStr = String.valueOf(doubleValue);
+				insertStatement.setDouble(pos, doubleValue);						
+			} else if ("Boolean".equalsIgnoreCase(dataType)) {						
+				Boolean boolValue = (Boolean)docProperty;
+				propertyValueStr = String.valueOf(boolValue);
+				insertStatement.setBoolean(pos, boolValue);
+			}  else if ("String".equalsIgnoreCase(dataType)) {						
+				propertyValueStr = (String)docProperty;
+				insertStatement.setString(pos, propertyValueStr);
 			}
-
-//			this.docNode.appendChild(propertiesNode);
 			
-			if(securityPolicy!=null) {
+			documentXML.addProperty(s, displayName, dataType, propertyValueStr);														
+			pos++;
+		}
+		
+		if(securityPolicy!=null) {
 
-				insertStatement.setString(7, securityPolicy.get_Id().toString());
-				insertStatement.setString(11, securityPolicy.get_DisplayName());
-				documentXML.setSecurity(securityPolicy.get_DisplayName());
-			} 
+			insertStatement.setString(7, securityPolicy.get_Id().toString());
+			insertStatement.setString(11, securityPolicy.get_DisplayName());
+			documentXML.setSecurity(securityPolicy.get_DisplayName());
+		} 
 
 		return insertStatement;
-		}
+		
 	}
 		
 	

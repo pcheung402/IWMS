@@ -63,6 +63,7 @@ public class Launcher {
 	static Integer docCount = null;
 	static String folderPath="";
 	static String saName;
+	static String strLastModifedDate=null;
 	static FNUtilLogger log;
 	static CPEUtil cpeUtil;	
 //	static FileOutputStream bulkOperationOutputDataFile;
@@ -139,11 +140,21 @@ public class Launcher {
         	sqlObject.setMaxRecords(docCount);
         }
         sqlObject.setOrderByClause("DateLastModified ASC");
+        String whereClause = null;
         if("ByFolder".equalsIgnoreCase(mode)) {
-        	sqlObject.setWhereClause("r.This INSUBFOLDER '" +folderPath + "'");
+        	whereClause = "r.This INSUBFOLDER '" +folderPath + "'";
+//        	sqlObject.setWhereClause("r.This INSUBFOLDER '" +folderPath + "'");
         } else if("BySA".equalsIgnoreCase(mode)) {
-        	 sqlObject.setWhereClause("StorageArea=Object('"+ getStorageAreaByName(saName).toString()+"')");
-        }         
+        	whereClause = "StorageArea=Object('"+ getStorageAreaByName(saName).toString()+"')";
+//        	 sqlObject.setWhereClause("StorageArea=Object('"+ getStorageAreaByName(saName).toString()+"')");
+        } 
+        
+        if (strLastModifedDate!=null) {
+        	whereClause = "r.DateLastModified >= " + strLastModifedDate + " AND " + whereClause;
+         }
+        
+        sqlObject.setWhereClause(whereClause);
+        
         String select = "r.DocumentTitle, r.Name, r.FoldersFiledIn, r.DateLastModified, r.DateCreated, r.VersionSeries, r.SecurityPolicy, r.MajorVersionNumber, r.MinorVersionNumber, r.Id, r.ClassDescription, r.MimeType, r.ContentElements, r.Annotations, r.StorageArea";
 //        String select = "r.DocumentTitle, r.Name, r.FoldersFiledIn, r.DateLastModified, r.DateCreated, r.VersionSeries, r.SecurityPolicy, r.MajorVersionNumber, r.MinorVersionNumber, r.Id, r.ClassDescription, r.MimeType, r.Annotations";
 
@@ -266,7 +277,9 @@ public class Launcher {
         optionCount.setRequired(false);
         options.addOption(optionCount);
         
-
+        Option optionLastModifiedTime = new Option("l", "lastmodifieddate", true, "last modified date");
+        optionLastModifiedTime.setRequired(false);
+        options.addOption(optionLastModifiedTime);
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
@@ -294,6 +307,9 @@ public class Launcher {
             
             if (cmd.hasOption("n")) 
             	docCount = Integer.parseInt(cmd.getOptionValue("count"));
+            
+            if (cmd.hasOption("l")) 
+            	strLastModifedDate = cmd.getOptionValue("lastmodifieddate");
 
         } catch (ParseException e) {
             System.out.println(e.getMessage());

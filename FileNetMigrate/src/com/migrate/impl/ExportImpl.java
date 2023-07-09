@@ -63,9 +63,9 @@ import com.fn.util.FNUtilLogger;
 import com.fn.util.FNExportStatus;
 import com.migrate.abs.BulkOperationThread;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Marshaller;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 public class ExportImpl extends BulkOperationThread {
 //	
@@ -102,7 +102,7 @@ public class ExportImpl extends BulkOperationThread {
 	public ExportImpl(String batchBaseDir, Document doc, FNUtilLogger log, CPEUtil cpeUtil, HashMap<String, List<String>> classPropertiesMap, HashMap<String,  HashMap<String,String>> propertyDefintion, String mode) {
 		super(batchBaseDir, doc, log, cpeUtil,classPropertiesMap, propertyDefintion, mode);
 		// TODO Auto-generated constructor stub
-		this.docSubDir = this.batchBaseDir + File.separator + "documents" + File.separator + getDocSubDir(doc);		
+		this.docSubDir = this.batchBaseDir + File.separator + "documents" + File.separator + getDocSubDir(doc);	
 	}
 	
 
@@ -157,7 +157,7 @@ public class ExportImpl extends BulkOperationThread {
 			
 			} catch (JAXBException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logExportError(doc, FNExportStatus.FAIL_CREATE_PROPTERY_FILE, "Fail create Properties.xml");
 			}
 		}
 
@@ -166,7 +166,7 @@ public class ExportImpl extends BulkOperationThread {
 	
 	
 	
-	private Boolean createDocument(Document doc) throws SQLException {
+	private Boolean createDocument(Document doc) throws SQLException, IOException {
 
 		PreparedStatement deleteDocumentStatement = conn.prepareStatement("DELETE FROM DOCUMENT WHERE OBJECT_ID=UUID_TO_BIN(?)");
 		deleteDocumentStatement.setString(1, doc.get_Id().toString());
@@ -182,22 +182,23 @@ public class ExportImpl extends BulkOperationThread {
 		if(insertStatement!=null) {
 			insertStatement.execute();
 			insertStatement.close();
+			Files.createDirectories(Paths.get(this.docSubDir));
 			
-			String[] propertiesNameArray = classPropertiesMap.get(classSymbolicName).toArray(new String[0]);
-			
-			for (int i = 0; i < propertiesNameArray.length; ++i) {
-				String dataType = propertyDefintion.get(propertiesNameArray[i]).get("dataType");
-				if("StringList".equalsIgnoreCase(dataType)||
-						"DateList".equalsIgnoreCase(dataType)||
-						"IdList".equalsIgnoreCase(dataType)||
-						"IntegerList".equalsIgnoreCase(dataType)||
-						"DoubleList".equalsIgnoreCase(dataType)||
-						"StringList".equalsIgnoreCase(dataType)
-						) {
-
-					addMultiValuedProperty(doc, propertiesNameArray[i]);
-				}
-			}
+//			String[] propertiesNameArray = classPropertiesMap.get(classSymbolicName).toArray(new String[0]);
+//			
+//			for (int i = 0; i < propertiesNameArray.length; ++i) {
+//				String dataType = propertyDefintion.get(propertiesNameArray[i]).get("dataType");
+//				if("StringList".equalsIgnoreCase(dataType)||
+//						"DateList".equalsIgnoreCase(dataType)||
+//						"IdList".equalsIgnoreCase(dataType)||
+//						"IntegerList".equalsIgnoreCase(dataType)||
+//						"DoubleList".equalsIgnoreCase(dataType)||
+//						"StringList".equalsIgnoreCase(dataType)
+//						) {
+//
+//					addMultiValuedProperty(doc, propertiesNameArray[i]);
+//				}
+//			}
 			
 
 			result = Boolean.TRUE;
@@ -410,7 +411,7 @@ public class ExportImpl extends BulkOperationThread {
 					documentXML.addContent(ct.get_ElementSequenceNumber(), file.getPath());
 				} catch (EngineRuntimeException e) {
 					if(e.getExceptionCode()==ExceptionCode.CONTENT_FCA_FILE_DOES_NOT_EXIST) {
-						logExportError(doc, FNExportStatus.EXPORT_CONTENT_ERROR, e.getMessage());
+						logExportError(doc, FNExportStatus.CONTENT_FCA_FILE_DOES_NOT_EXIST, e.getMessage());
 					}
 					else
 						logExportError(doc, FNExportStatus.OTHER_ERROR, e.getMessage());
@@ -530,8 +531,8 @@ public class ExportImpl extends BulkOperationThread {
 	}
 	
 	private void logExportError(Document doc, Integer errorCode, String errorMeesage) throws SQLException {
-		log.error(String.format("%d,%s,%s,%s",doc.get_Id().toString(), FNExportStatus.EXPORT_CONTENT_ERROR,doc.get_StorageArea().get_DisplayName(), errorMeesage));
-		updateDocumentExportStatus(doc, FNExportStatus.EXPORT_CONTENT_ERROR);
+		log.error(String.format("%s,%d,%s,%s",doc.get_Id().toString(),errorCode ,doc.get_StorageArea().get_DisplayName(), errorMeesage));
+		updateDocumentExportStatus(doc,errorCode);
 		
 	}
 }

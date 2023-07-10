@@ -25,7 +25,9 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -43,6 +45,7 @@ import com.filenet.api.query.RepositoryRow;
 import com.filenet.api.query.SearchSQL;
 import com.filenet.api.query.SearchScope;
 import com.filenet.api.util.Id;
+//import com.filenet.apiimpl.jdbc.Statement;
 import com.filenet.api.core.ContentTransfer;
 import com.filenet.api.core.Document;
 import com.filenet.api.core.Factory;
@@ -72,10 +75,10 @@ public class Launcher {
 //	static HashMap<String, String> propertyDefintion;
 	static HashMap<String, HashMap<String,String>> propertyDefintion;
 	static HashMap<String, List<String>> classPropertiesMap;
-//	static String JDBCURL;
-//	static String dbuser;
-//	static String dbpassword;
-//	static java.sql.Connection conn=null;
+	static String JDBCURL;
+	static String dbuser;
+	static String dbpassword;
+	static java.sql.Connection conn=null;
 
 	public static void main(String[] args) 
 			throws 	
@@ -89,7 +92,7 @@ public class Launcher {
 			java.text.ParseException, 
 			InterruptedException, 
 			ParserConfigurationException, 
-			SAXException {
+			SAXException, SQLException {
 
 		initialize(args);
         RejectedExecutionHandlerImpl rejectionHandler = new RejectedExecutionHandlerImpl();
@@ -211,11 +214,23 @@ public class Launcher {
 		boolean finished = executorPool.awaitTermination(10, TimeUnit.SECONDS);	// wait until shutdown completed		
 //		bulkOperationOutputDataFile.flush();
 //		bulkOperationOutputDataFile.close();
-		if (isOverdue) {
-			log.info(String.format("overdue %s",batchBaseDir));
-		} else {
-			log.info(String.format("finished %s",batchBaseDir));
-		}
+		
+		String queryString = "SELECT date_format(convert_tz(max(date_last_modified), '+08:00','+00:00'),'%Y%m%dT%H%i%sZ') as lastmodifieddate from document";
+
+		Statement queryStatement = conn.createStatement();
+		ResultSet rs = queryStatement.executeQuery(queryString);
+		rs.next();
+		String lastModifiedDate = rs.getString("lastmodifieddate");
+		
+		log.info(String.format("$s %s, Last Modified Date:%s",isOverdue?"overdue":"finished", batchBaseDir, lastModifiedDate));
+//			
+//		if (isOverdue) {
+//			log.info(String.format("overdue %s, Last Modified Date:%s",batchBaseDir, lastModifiedDate));
+//		} else {
+//			log.info(String.format("finished %s, Last Modified Date:%s",batchBaseDir, lastModifiedDate));
+//		}
+		
+
 	}
 	
 	private static Id getStorageAreaByName(String saName) {
@@ -332,10 +347,10 @@ public class Launcher {
 //			props.load(new FileInputStream("config/docdb.conf"));
 			batchStartTime = dateFormatter.parse(props.getProperty("batchStartTime"));
 			batchEndTime = dateFormatter.parse(props.getProperty("batchEndTime"));
-//			JDBCURL = "jdbc:mysql://"+ props.getProperty("DOCDBServer") + ":" + props.getProperty("DOCDBPort") + "/" + props.getProperty("DOCDBDatabase") + "?autoReconnect=true&failOverReadOnly=false";
-//			dbuser = props.getProperty("DOCDBUser");
-//			dbpassword = props.getProperty("DOCDBPassword");
-//			conn = getMySQLConnection();
+			JDBCURL = "jdbc:mysql://"+ props.getProperty("DOCDBServer") + ":" + props.getProperty("DOCDBPort") + "/" + props.getProperty("DOCDBDatabase") + "?autoReconnect=true&failOverReadOnly=false";
+			dbuser = props.getProperty("DOCDBUser");
+			dbpassword = props.getProperty("DOCDBPassword");
+			conn = getMySQLConnection();
 		} catch (ClassNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -434,15 +449,15 @@ public class Launcher {
 		}
 	}
 	
-//	private static java.sql.Connection getMySQLConnection(){
-//		java.sql.Connection result = null;
-//		try {
-//			result = DriverManager.getConnection(JDBCURL, dbuser, dbpassword);
-//			result.setAutoCommit(true);
-//		}catch (SQLException e) {
-//			e.printStackTrace();
-//			System.exit(1);
-//		} 			
-//		return result;		
-//	}
+	private static java.sql.Connection getMySQLConnection(){
+		java.sql.Connection result = null;
+		try {
+			result = DriverManager.getConnection(JDBCURL, dbuser, dbpassword);
+			result.setAutoCommit(true);
+		}catch (SQLException e) {
+			e.printStackTrace();
+			System.exit(1);
+		} 			
+		return result;		
+	}
 }

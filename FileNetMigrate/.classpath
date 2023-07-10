@@ -16,8 +16,7 @@
 	<classpathentry kind="lib" path="lib/commons-cli-1.3.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/FNUtil"/>
 	<classpathentry kind="lib" path="lib/gson-2.8.2.jar"/>
-	<classpathentry kind="lib" path="C:/Users/pcheung/Documents/resources.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OpenEJB"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/openEJB"/>
+	<classpathentry kind="lib" path="D:/iwms_workspace/resources.jar"/>
+	<classpathentry kind="lib" path="lib/jaxb-api-2.3.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

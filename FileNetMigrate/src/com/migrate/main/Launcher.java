@@ -114,8 +114,10 @@ public class Launcher {
     			}
     			
     			CSVParser csvParser = new CSVParser();
-    			String[] parsedLine = csvParser.lineParser(line);    			
-    			Document doc = Factory.Document.fetchInstance(cpeUtil.getObjectStore(), new Id(parsedLine[0]), null);
+    			String[] parsedLine = csvParser.lineParser(line);
+    			try {
+    				Document doc = Factory.Document.fetchInstance(cpeUtil.getObjectStore(), new Id(parsedLine[0]), null);
+    			
     			doc.fetchProperties(new String[] {"DocumentTitle", "Name", "FoldersFiledIn", "DateLastModified", 
     					"DateCreated", "VersionSeries", "SecurityPolicy", "MajorVersionNumber", 
     					"MinorVersionNumber", "Id", "ClassDescription", "MimeType", /*"ContentElements",*/ "Annotations", "StorageArea"});
@@ -128,6 +130,9 @@ public class Launcher {
     			HashMap.class,
     			String.class});	
     			executorPool.execute((Runnable) cons.newInstance(new Object[] {batchBaseDir, doc, log, cpeUtil, classPropertiesMap, propertyDefintion, mode}));	
+    			} catch (Exception e) {
+    				log.error(String.format("%s,,s,%s",parsedLine[0], e.getMessage()));
+    			}
 //    			if (doc.get_ContentElements().iterator().hasNext()) {
 //    			ContentTransfer ct = (ContentTransfer)doc.get_ContentElements().iterator().next();	    			
 //
@@ -222,7 +227,7 @@ public class Launcher {
 		rs.next();
 		String lastModifiedDate = rs.getString("lastmodifieddate");
 		
-		log.info(String.format("$s %s, Last Modified Date:%s",isOverdue?"overdue":"finished", batchBaseDir, lastModifiedDate));
+		log.info(String.format("%s %s, Last Modified Date:%s",isOverdue?"overdue":"finished", batchBaseDir, lastModifiedDate));
 //			
 //		if (isOverdue) {
 //			log.info(String.format("overdue %s, Last Modified Date:%s",batchBaseDir, lastModifiedDate));

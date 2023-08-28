@@ -400,13 +400,14 @@ public class ExportImpl2 extends BulkOperationThread {
 		            }
 		            os.close();
 		            is.close();
-		            is = ct.accessContentStream();
+//		            is = ct.accessContentStream();
 					
 					insertStatement.setString(1, doc.get_Id().toString());
 					insertStatement.setInt(2, ct.get_ElementSequenceNumber());
 					insertStatement.setString(3, ct.get_ContentType());
 					insertStatement.setString(4, ct.get_RetrievalName());
-					insertStatement.setBinaryStream(5, is);
+//					insertStatement.setBinaryStream(5, is);
+					insertStatement.setNull(5, java.sql.Types.NULL);
 					insertStatement.addBatch();						
 					documentXML.addContent(ct.get_ElementSequenceNumber(), file.getPath());
 				} catch (EngineRuntimeException e) {
@@ -488,7 +489,8 @@ public class ExportImpl2 extends BulkOperationThread {
 				addAnnotContentStatement.setInt(2, ct.get_ElementSequenceNumber());
 				addAnnotContentStatement.setString(3, ct.get_ContentType());
 				addAnnotContentStatement.setString(4, ct.get_RetrievalName());
-				addAnnotContentStatement.setBinaryStream(5, ct.accessContentStream());				
+//				addAnnotContentStatement.setBinaryStream(5, ct.accessContentStream());
+				addAnnotContentStatement.setNull(5, java.sql.Types.NULL);
 				addAnnotContentStatement.addBatch();
 				documentXML.addAnnotation(annot.get_Id(), annot.get_DateCreated(), annot.get_DateLastModified(), annot.get_AnnotatedContentElement(), file.getPath());
 			}

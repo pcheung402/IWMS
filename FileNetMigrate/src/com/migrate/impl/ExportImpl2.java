@@ -199,7 +199,9 @@ public class ExportImpl2 extends BulkOperationThread {
 //					addMultiValuedProperty(doc, propertiesNameArray[i]);
 //				}
 //			}
-			
+			for (String s: multiValuedProperties) {
+				addMultiValuedProperty(doc,s);
+			}
 
 			result = Boolean.TRUE;
 		}

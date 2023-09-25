@@ -16,7 +16,7 @@ class Property implements Serializable{
 	@XmlElement(name="Name")
 	private String name;
 
-	@XmlElement(name="Display Name")
+	@XmlElement(name="DisplayName")
 	private String displayName;
 	
 	@XmlElement(name="Type")

@@ -184,8 +184,8 @@ public class ExportImpl extends BulkOperationThread {
 			insertStatement.close();
 			Files.createDirectories(Paths.get(this.docSubDir));
 			
-//			String[] propertiesNameArray = classPropertiesMap.get(classSymbolicName).toArray(new String[0]);
-//			
+			String[] propertiesNameArray = classPropertiesMap.get(classSymbolicName).toArray(new String[0]);
+			
 //			for (int i = 0; i < propertiesNameArray.length; ++i) {
 //				String dataType = propertyDefintion.get(propertiesNameArray[i]).get("dataType");
 //				if("StringList".equalsIgnoreCase(dataType)||
@@ -199,6 +199,10 @@ public class ExportImpl extends BulkOperationThread {
 //					addMultiValuedProperty(doc, propertiesNameArray[i]);
 //				}
 //			}
+			
+			for (String s: multiValuedProperties) {
+				addMultiValuedProperty(doc,s);
+			}
 			
 
 			result = Boolean.TRUE;

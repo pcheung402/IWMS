@@ -363,6 +363,7 @@ public class ExportImpl extends BulkOperationThread {
 						
 			StringList strngList = properties.getStringListValue(propertySymbolicName);
 			Iterator<String> it = strngList.iterator();
+			ArrayList<String> value = new ArrayList<String>();
 			while(it.hasNext()) {
 				String str = it.next();
 				insertStatement.setString(1, doc.get_Id().toString());
@@ -371,9 +372,9 @@ public class ExportImpl extends BulkOperationThread {
 				insertStatement.setString(4, str);
 
 				insertStatement.addBatch();
-				documentXML.addProperty(propertySymbolicName, displayName, "String", str);				
+				value.add(str);				
 			}
-			
+			documentXML.addProperty(propertySymbolicName, displayName, "String", value);
 			insertStatement.executeBatch();
 			insertStatement.close();
 		}

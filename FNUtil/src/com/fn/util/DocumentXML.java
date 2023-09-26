@@ -22,10 +22,13 @@ class Property implements Serializable{
 	@XmlElement(name="Type")
 	private String type;
 	
-	@XmlElement(name="Value")
-	private String value;
+//	@XmlElement(name="Value")
+//	private String value;
 	
-	public Property(String name, String displayName, String type, String value) {
+	@XmlElement(name="Value")
+	private ArrayList<String> value;
+	
+	public Property(String name, String displayName, String type, ArrayList<String> value) {
 		this.name = name;
 		this.displayName = displayName;
 		this.type = type;
@@ -107,6 +110,12 @@ public class DocumentXML implements Serializable {
 	}
 	
 	public void addProperty(String name, String displayName, String type, String value) {
+		ArrayList<String> valueArray = new ArrayList<String>();
+		valueArray.add(value);
+		this.properties.add(new Property(name, displayName, type, valueArray));
+	}
+	
+	public void addProperty(String name, String displayName, String type, ArrayList<String> value) {
 		this.properties.add(new Property(name, displayName, type, value));
 	}
 	

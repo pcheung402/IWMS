@@ -120,7 +120,7 @@ public class Launcher {
     			
     			doc.fetchProperties(new String[] {"DocumentTitle", "Name", "FoldersFiledIn", "DateLastModified", 
     					"DateCreated", "VersionSeries", "SecurityPolicy", "MajorVersionNumber", 
-    					"MinorVersionNumber", "Id", "ClassDescription", "MimeType", /*"ContentElements",*/ "Annotations", "StorageArea"});
+    					"MinorVersionNumber", "Id", "ClassDescription", "MimeType", /*"ContentElements",*/ "Annotations", "StorageArea","Creator","LastModifier"});
     			Constructor<?> cons = bulkOperationClass.getConstructor(new Class[]
     			{String.class,
     			Document.class,
@@ -163,7 +163,7 @@ public class Launcher {
         
         sqlObject.setWhereClause(whereClause);
         
-        String select = "r.DocumentTitle, r.Name, r.FoldersFiledIn, r.DateLastModified, r.DateCreated, r.VersionSeries, r.SecurityPolicy, r.MajorVersionNumber, r.MinorVersionNumber, r.Id, r.ClassDescription, r.MimeType, r.ContentElements, r.Annotations, r.StorageArea";
+        String select = "r.DocumentTitle, r.Name, r.FoldersFiledIn, r.DateLastModified, r.DateCreated, r.VersionSeries, r.SecurityPolicy, r.MajorVersionNumber, r.MinorVersionNumber, r.Id, r.ClassDescription, r.MimeType, r.ContentElements, r.Annotations, r.StorageArea, r.Creator, r.LastModifier";
 //        String select = "r.DocumentTitle, r.Name, r.FoldersFiledIn, r.DateLastModified, r.DateCreated, r.VersionSeries, r.SecurityPolicy, r.MajorVersionNumber, r.MinorVersionNumber, r.Id, r.ClassDescription, r.MimeType, r.Annotations";
 
         sqlObject.setSelectList(select);

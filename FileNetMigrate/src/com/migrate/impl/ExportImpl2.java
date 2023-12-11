@@ -177,8 +177,6 @@ public class ExportImpl2 extends BulkOperationThread {
 		
 		PreparedStatement insertStatement = pepareInsertStatement(doc, classSymbolicName);
 		
-
-		
 		if(insertStatement!=null) {
 			insertStatement.execute();
 			insertStatement.close();
@@ -217,6 +215,8 @@ public class ExportImpl2 extends BulkOperationThread {
 		securityPolicy.fetchProperties(new String[] {"DisplayName"});
 		Date dateCreated = doc.get_DateCreated();
 		Date dateLastModified = doc.get_DateLastModified();
+		String creator = docProperties.getStringValue("Creator");
+		String lastModifier = docProperties.getStringValue("LastModifier");
 		
 		String[] sysProperties = {
 				"OBJECT_ID",
@@ -230,15 +230,22 @@ public class ExportImpl2 extends BulkOperationThread {
 				"DOCUMENTTITLE",
 				"MIME_TYPE",
 				"SECURITY_NAME",
-				"STORAGE_AREA_NAME"
+				"STORAGE_AREA_NAME",
+				"CREATOR",
+				"LAST_MODIFIER"
 		};
 
+		String dumStr = "";
+		for (String s:singleValuedProperties) {
+			dumStr = dumStr + ",`" + s + "`";
+		}
 		String queryString= "REPLACE INTO DOCUMENT ("
 //					+ "OBJECT_ID,OBJECT_VSID,MAJOR_VER,MINOR_VER,DATE_CREATED,DATE_LAST_MODIFIED,SECURITY_POLICY,CLASS_SYMBOLIC_NAME,DOCUMENTTITLE,MIME_TYPE"
 				+ String.join(",", sysProperties)
-				+ "," 
-				+ String.join(",", singleValuedProperties)									
-				+ ") VALUES (UUID_TO_BIN(?),UUID_TO_BIN(?),?,?,?,?,UUID_TO_BIN(?),?,?,?,?,?";
+//				+ "," 
+//				+ String.join(",", singleValuedProperties)
+				+ dumStr
+				+ ") VALUES (UUID_TO_BIN(?),UUID_TO_BIN(?),?,?,?,?,UUID_TO_BIN(?),?,?,?,?,?,?,?";
 		
 //			queryString += ",?".repeat(singleValuedProperties.size());
 		for (String s:singleValuedProperties) {
@@ -247,7 +254,8 @@ public class ExportImpl2 extends BulkOperationThread {
 	
 	
 		queryString += ")";
-;			
+
+		System.out.println(queryString);
 			PreparedStatement insertStatement = conn.prepareCall(queryString);
 			
 			insertStatement.setString(1, doc.get_Id().toString());
@@ -299,6 +307,11 @@ public class ExportImpl2 extends BulkOperationThread {
 		String storageAreaName = sa.get_DisplayName();
 		insertStatement.setString(12, storageAreaName);
 		documentXML.addProperty("STORAGE_AREA", "Storage Area", "String", storageAreaName);
+
+		insertStatement.setString(13, creator);
+		documentXML.addProperty("CREATOR", "Creator", "String", creator);
+		insertStatement.setString(14, lastModifier);
+		documentXML.addProperty("LAST_MODIFIER", "Last Modifier", "String", lastModifier);
 		
 		Integer pos = sysProperties.length + 1;
 		for (String s: singleValuedProperties) {
